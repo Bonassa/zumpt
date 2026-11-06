@@ -44,6 +44,23 @@ final class CalendarModel {
         )
     }
 
+    func details(of event: CalendarEvent) -> EventDetails? {
+        store.details(of: event)
+    }
+
+    func calendarAppURL(for event: CalendarEvent) -> URL? {
+        store.calendarAppURL(for: event)
+    }
+
+    func placement(ofCalendar calendarID: String) -> (calendar: EventCalendar, account: CalendarAccount)? {
+        for account in accounts {
+            if let eventCalendar = account.calendars.first(where: { $0.id == calendarID }) {
+                return (eventCalendar, account)
+            }
+        }
+        return nil
+    }
+
     func requestAccess() async {
         access = await store.requestAccess()
         reload()

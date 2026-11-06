@@ -18,6 +18,7 @@ struct CalendarScreen: View {
                     now: model.now()
                 )
             }
+            .environment(model)
             .background(Color(nsColor: .textBackgroundColor))
             .toolbar {
                 ToolbarItem(placement: .navigation) {

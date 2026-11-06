@@ -27,6 +27,14 @@
         func events(in interval: DateInterval) -> [CalendarEvent] {
             fixtureEvents.filter { $0.start < interval.end && $0.end > interval.start }
         }
+
+        func details(of event: CalendarEvent) -> EventDetails? {
+            FixtureData.details[event.title]
+        }
+
+        func calendarAppURL(for event: CalendarEvent) -> URL? {
+            URL(string: "ical://ekevent/\(event.id)")
+        }
     }
 
     private enum FixtureData {
@@ -39,6 +47,64 @@
             CalendarAccount(id: "fixture-google", title: "Google · Trabalho", calendars: [agenda, holidays]),
             CalendarAccount(id: "fixture-exchange", title: "Outlook · Exchange", calendars: [work, birthdays]),
         ]
+
+        static let details: [String: EventDetails] = [
+            "Planejamento": EventDetails(
+                location: "Sala Júpiter",
+                notes: """
+                    Pauta:
+                    - Prioridades da sprint
+                    - Riscos e dependências
+
+                    Reunião do Microsoft Teams
+                    Ingressar: https://teams.microsoft.com/l/meetup-join/19%3ameeting_zumpt%40thread.v2/0
+                    Documento da sprint: https://example.com/sprints/45
+                    """,
+                url: nil,
+                participants: [
+                    person("Ana Souza", .accepted, isOrganizer: true),
+                    person("Pedro Alves", .accepted, isCurrentUser: true),
+                    person("Carla Mendes", .declined),
+                    person("Diego Rocha", .pending),
+                    person("Beatriz Lima", .accepted),
+                    person("Felipe Nunes", .tentative),
+                ],
+                recurrence: Recurrence(frequency: .weekly, interval: 1, weekdays: [2])
+            ),
+            "Fórum de produto": EventDetails(
+                location: nil,
+                notes: nil,
+                url: URL(string: "https://meet.google.com/abc-defg-hij"),
+                participants: [
+                    person("Beatriz Lima", .accepted, isOrganizer: true),
+                    person("Pedro Alves", .pending, isCurrentUser: true),
+                    person("Ana Souza", .accepted),
+                ],
+                recurrence: Recurrence(frequency: .weekly, interval: 2, weekdays: [4])
+            ),
+            "App Móvel · Daily": EventDetails(
+                location: "https://example.zoom.us/j/123456789",
+                notes: nil,
+                url: nil,
+                participants: [],
+                recurrence: Recurrence(frequency: .weekly, interval: 1, weekdays: [2, 3, 4, 5, 6])
+            ),
+        ]
+
+        private static func person(
+            _ name: String,
+            _ response: ResponseStatus,
+            isOrganizer: Bool = false,
+            isCurrentUser: Bool = false
+        ) -> Participant {
+            Participant(
+                name: name,
+                email: "\(name.lowercased().replacingOccurrences(of: " ", with: "."))@example.com",
+                response: response,
+                isOrganizer: isOrganizer,
+                isCurrentUser: isCurrentUser
+            )
+        }
 
         static func events(in week: Week, calendar: Calendar) -> [CalendarEvent] {
             let builder = Builder(week: week, calendar: calendar)

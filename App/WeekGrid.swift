@@ -32,12 +32,19 @@ struct WeekGrid: View {
     @State private var scrollPosition = ScrollPosition(
         y: WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
     )
+    @State private var selectedEventID: String?
 
     var body: some View {
         VStack(spacing: 0) {
             DayHeaderRow(days: week.days, calendar: calendar, now: now)
             Rectangle().fill(Color.gridLine).frame(height: 1)
-            AllDayRow(days: week.days, events: events, colors: colors, calendar: calendar)
+            AllDayRow(
+                days: week.days,
+                events: events,
+                colors: colors,
+                calendar: calendar,
+                selectedEventID: $selectedEventID
+            )
             Rectangle().fill(Color.strongGridLine).frame(height: 1)
             ScrollView(.vertical) {
                 HStack(alignment: .top, spacing: 0) {
@@ -49,7 +56,8 @@ struct WeekGrid: View {
                                 events: DayLayout.timedEvents(events, on: day, calendar: calendar),
                                 colors: colors,
                                 isWeekend: calendar.isDateInWeekend(day),
-                                nowMinute: calendar.isDate(day, inSameDayAs: now) ? nowMinute : nil
+                                nowMinute: calendar.isDate(day, inSameDayAs: now) ? nowMinute : nil,
+                                selectedEventID: $selectedEventID
                             )
                             .layoutValue(
                                 key: ColumnWeight.self,
@@ -144,6 +152,7 @@ private struct AllDayRow: View {
     let events: [CalendarEvent]
     let colors: [String: CalendarColor]
     let calendar: Calendar
+    @Binding var selectedEventID: String?
 
     var body: some View {
         HStack(spacing: 0) {
@@ -158,7 +167,8 @@ private struct AllDayRow: View {
                     AllDayCell(
                         events: DayLayout.allDayEvents(events, on: day, calendar: calendar),
                         colors: colors,
-                        isWeekend: calendar.isDateInWeekend(day)
+                        isWeekend: calendar.isDateInWeekend(day),
+                        selectedEventID: $selectedEventID
                     )
                     .layoutValue(key: ColumnWeight.self, value: WeekGridMetrics.weight(of: day, calendar: calendar))
                 }
@@ -175,11 +185,16 @@ private struct AllDayCell: View {
     let events: [CalendarEvent]
     let colors: [String: CalendarColor]
     let isWeekend: Bool
+    @Binding var selectedEventID: String?
 
     var body: some View {
         VStack(spacing: 4) {
             ForEach(events) { event in
-                AllDayChip(event: event, color: colors[event.calendarID]?.color ?? .unknownCalendar)
+                AllDayChip(
+                    event: event,
+                    color: colors[event.calendarID] ?? .unknown,
+                    selectedEventID: $selectedEventID
+                )
             }
         }
         .padding(.vertical, 4)
@@ -194,20 +209,29 @@ private struct AllDayCell: View {
 
 private struct AllDayChip: View {
     let event: CalendarEvent
-    let color: Color
+    let color: CalendarColor
+    @Binding var selectedEventID: String?
 
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let palette = EventPalette(base: color, colorScheme: colorScheme)
-        EventTitle(event: event)
-            .font(.system(size: 11, weight: .semibold))
-            .lineLimit(1)
-            .padding(.horizontal, 7)
-            .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 22, alignment: .leading)
-            .foregroundStyle(palette.text)
-            .background(palette.fill, in: .rect(cornerRadius: 5))
-            .accessibilityIdentifier("event-\(event.title)")
+        let isSelected = selectedEventID == event.id
+        Button {
+            selectedEventID = event.id
+        } label: {
+            EventTitle(event: event)
+                .font(.system(size: 11, weight: .semibold))
+                .lineLimit(1)
+                .padding(.horizontal, 7)
+                .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 22, alignment: .leading)
+                .foregroundStyle(isSelected ? palette.selectedText : palette.text)
+                .background(isSelected ? palette.selectedFill : palette.fill, in: .rect(cornerRadius: 5))
+                .contentShape(.rect(cornerRadius: 5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("event-\(event.title)")
+        .eventDetailsPopover(for: event, selectedEventID: $selectedEventID)
     }
 }
 

@@ -8,4 +8,6 @@ protocol CalendarStore: AnyObject {
     func requestAccess() async -> CalendarAccess
     func accounts() -> [CalendarAccount]
     func events(in interval: DateInterval) -> [CalendarEvent]
+    func details(of event: CalendarEvent) -> EventDetails?
+    func calendarAppURL(for event: CalendarEvent) -> URL?
 }

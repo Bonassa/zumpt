@@ -6,6 +6,7 @@ struct DayColumn: View {
     let colors: [String: CalendarColor]
     let isWeekend: Bool
     let nowMinute: Int?
+    @Binding var selectedEventID: String?
 
     var body: some View {
         GeometryReader { proxy in
@@ -14,10 +15,12 @@ struct DayColumn: View {
                     let frame = Self.frame(of: positioned, columnWidth: proxy.size.width)
                     EventBlock(
                         event: positioned.event,
-                        color: colors[positioned.event.calendarID]?.color ?? .unknownCalendar,
-                        height: frame.height
+                        color: colors[positioned.event.calendarID] ?? .unknown,
+                        height: frame.height,
+                        selectedEventID: $selectedEventID
                     )
                     .frame(width: frame.width, height: frame.height)
+                    .eventDetailsPopover(for: positioned.event, selectedEventID: $selectedEventID)
                     .offset(x: frame.minX, y: frame.minY)
                 }
                 if let nowMinute {
@@ -62,34 +65,72 @@ struct EventTitle: View {
     }
 }
 
+extension View {
+    func eventDetailsPopover(for event: CalendarEvent, selectedEventID: Binding<String?>) -> some View {
+        modifier(EventDetailsPopover(event: event, selectedEventID: selectedEventID))
+    }
+}
+
+private struct EventDetailsPopover: ViewModifier {
+    let event: CalendarEvent
+    @Binding var selectedEventID: String?
+
+    @Environment(\.locale) private var locale
+
+    func body(content: Content) -> some View {
+        content.popover(isPresented: isPresented, arrowEdge: .trailing) {
+            EventDetailsView(event: event)
+                .environment(\.locale, locale)
+        }
+    }
+
+    private var isPresented: Binding<Bool> {
+        Binding(
+            get: { selectedEventID == event.id },
+            set: { isPresented in
+                if !isPresented, selectedEventID == event.id {
+                    selectedEventID = nil
+                }
+            }
+        )
+    }
+}
+
 private struct EventBlock: View {
     let event: CalendarEvent
-    let color: Color
+    let color: CalendarColor
     let height: CGFloat
+    @Binding var selectedEventID: String?
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.locale) private var locale
 
     var body: some View {
         let palette = EventPalette(base: color, colorScheme: colorScheme)
-        VStack(alignment: .leading, spacing: 1) {
-            EventTitle(event: event)
-                .font(.system(size: 11, weight: .semibold))
-                .lineLimit(showsTime ? 2 : 1)
-            if showsTime {
-                Text(timeRange)
-                    .font(.system(size: 11))
-                    .monospacedDigit()
-                    .lineLimit(1)
+        let isSelected = selectedEventID == event.id
+        Button {
+            selectedEventID = event.id
+        } label: {
+            VStack(alignment: .leading, spacing: 1) {
+                EventTitle(event: event)
+                    .font(.system(size: 11, weight: .semibold))
+                    .lineLimit(showsTime ? 2 : 1)
+                if showsTime {
+                    Text(timeRange)
+                        .font(.system(size: 11))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                }
             }
+            .padding(.horizontal, 6)
+            .padding(.vertical, height < 26 ? 3 : 4)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .foregroundStyle(isSelected ? palette.selectedText : palette.text)
+            .background(isSelected ? palette.selectedFill : palette.fill, in: .rect(cornerRadius: 5))
+            .clipShape(.rect(cornerRadius: 5))
+            .contentShape(.rect(cornerRadius: 5))
         }
-        .padding(.horizontal, 6)
-        .padding(.vertical, height < 26 ? 3 : 4)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .foregroundStyle(palette.text)
-        .background(palette.fill, in: .rect(cornerRadius: 5))
-        .clipShape(.rect(cornerRadius: 5))
-        .accessibilityElement(children: .combine)
+        .buttonStyle(.plain)
         .accessibilityIdentifier("event-\(event.title)")
     }
 
@@ -113,6 +154,7 @@ private struct NowLine: View {
                     .frame(width: 10, height: 10)
                     .offset(x: -4)
             }
+            .allowsHitTesting(false)
             .accessibilityHidden(true)
     }
 }
