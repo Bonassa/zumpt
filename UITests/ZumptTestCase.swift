@@ -45,7 +45,8 @@ class ZumptTestCase: XCTestCase {
     @MainActor
     func displayedText(of element: XCUIElement) -> String {
         let value = element.value as? String ?? ""
-        return value.isEmpty ? element.label : value
+        let text = value.isEmpty ? element.label : value
+        return text.replacing(/[\u{2009}\u{202F}\u{00A0}]/, with: " ")
     }
 
     @MainActor

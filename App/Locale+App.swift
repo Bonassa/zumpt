@@ -6,7 +6,7 @@ extension Locale {
             return .current
         }
         var components = Locale.Components(locale: .current)
-        components.languageComponents = Locale.Language.Components(identifier: language)
+        components.languageComponents.languageCode = Locale.Language(identifier: language).languageCode
         return Locale(components: components)
     }
 }
