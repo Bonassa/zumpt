@@ -37,10 +37,12 @@ struct DayColumn: View {
         let inset: CGFloat = 3
         let gap: CGFloat = 2
         let columnCount = CGFloat(positioned.columnCount)
-        let width = (columnWidth - inset * 2 - gap * (columnCount - 1)) / columnCount
+        let singleColumnWidth = (columnWidth - inset * 2 - gap * (columnCount - 1)) / columnCount
+        let columnSpan = CGFloat(positioned.columnSpan)
+        let width = singleColumnWidth * columnSpan + gap * (columnSpan - 1)
         let duration = positioned.endMinute - positioned.startMinute
         return CGRect(
-            x: inset + CGFloat(positioned.column) * (width + gap),
+            x: inset + CGFloat(positioned.column) * (singleColumnWidth + gap),
             y: WeekGridMetrics.y(forMinute: positioned.startMinute),
             width: max(width, 0),
             height: max(WeekGridMetrics.y(forMinute: duration) - 2, 20)

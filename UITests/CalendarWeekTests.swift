@@ -28,18 +28,18 @@ final class CalendarWeekTests: ZumptTestCase {
         let app = launchApp()
         assertWeekHeader(in: app, title: "Novembro 2026", number: "Semana 45")
 
-        element("next-week", in: app).click()
+        click("next-week", in: app)
 
         assertWeekHeader(in: app, title: "Novembro 2026", number: "Semana 46")
         XCTAssertTrue(element("event-Planejamento", in: app).waitForNonExistence(timeout: 2))
         XCTAssertFalse(element("now-indicator", in: app).exists)
 
-        element("today", in: app).click()
+        click("today", in: app)
 
         assertWeekHeader(in: app, title: "Novembro 2026", number: "Semana 45")
         XCTAssertTrue(element("event-Planejamento", in: app).waitForExistence(timeout: 2))
 
-        element("previous-week", in: app).click()
+        click("previous-week", in: app)
 
         assertWeekHeader(in: app, title: "Outubro 2026", number: "Semana 44")
     }
@@ -50,15 +50,29 @@ final class CalendarWeekTests: ZumptTestCase {
         let holiday = element("event-Finados", in: app)
         XCTAssertTrue(holiday.waitForExistence(timeout: 5))
 
-        element("calendar-toggle-fixture-holidays", in: app).click()
+        click("calendar-toggle-fixture-holidays", in: app)
 
         XCTAssertTrue(holiday.waitForNonExistence(timeout: 2))
         XCTAssertTrue(element("event-Planejamento", in: app).exists)
         attachWindowScreenshot(of: app)
 
-        element("calendar-toggle-fixture-holidays", in: app).click()
+        click("calendar-toggle-fixture-holidays", in: app)
 
         XCTAssertTrue(holiday.waitForExistence(timeout: 2))
+    }
+
+    @MainActor
+    func testShowsAMeetingFromSeveralCalendarsOnce() {
+        let app = launchApp()
+        XCTAssertTrue(element("event-Planejamento", in: app).waitForExistence(timeout: 5))
+        XCTAssertEqual(count(of: "event-Planejamento", in: app), 1)
+        XCTAssertTrue(element("event-Fórum de produto", in: app).exists)
+        XCTAssertFalse(element("event-ENC: Fórum de produto", in: app).exists, "A forwarded copy is the same meeting")
+
+        click("calendar-toggle-fixture-agenda", in: app)
+
+        XCTAssertTrue(element("event-ENC: Fórum de produto", in: app).waitForExistence(timeout: 2))
+        XCTAssertEqual(count(of: "event-Planejamento", in: app), 1, "The copy from the other calendar takes over")
     }
 
     @MainActor
@@ -67,15 +81,15 @@ final class CalendarWeekTests: ZumptTestCase {
         XCTAssertTrue(element("hour-label-8", in: app).waitForExistence(timeout: 5))
         assertWorkdayStartsAtTheTop(in: app)
 
-        element("calendar-toggle-fixture-holidays", in: app).click()
+        click("calendar-toggle-fixture-holidays", in: app)
         XCTAssertTrue(element("event-Finados", in: app).waitForNonExistence(timeout: 2))
         assertWorkdayStartsAtTheTop(in: app)
 
-        element("calendar-toggle-fixture-holidays", in: app).click()
+        click("calendar-toggle-fixture-holidays", in: app)
         XCTAssertTrue(element("event-Finados", in: app).waitForExistence(timeout: 2))
         assertWorkdayStartsAtTheTop(in: app)
 
-        element("next-week", in: app).click()
+        click("next-week", in: app)
         assertWeekHeader(in: app, title: "Novembro 2026", number: "Semana 46")
         assertWorkdayStartsAtTheTop(in: app)
     }

@@ -5,6 +5,7 @@ public struct PositionedEvent: Hashable, Sendable {
     public let startMinute: Int
     public let endMinute: Int
     public let column: Int
+    public let columnSpan: Int
     public let columnCount: Int
 }
 
@@ -95,14 +96,38 @@ public enum DayLayout {
                 columns.append(columnEndMinutes.count - 1)
             }
         }
-        return zip(cluster, columns).map { span, column in
+        let placed = Array(zip(cluster, columns))
+        let columnCount = columnEndMinutes.count
+        return placed.map { span, column in
             PositionedEvent(
                 event: span.event,
                 startMinute: span.startMinute,
                 endMinute: span.endMinute,
                 column: column,
-                columnCount: columnEndMinutes.count
+                columnSpan: freeColumnSpan(of: span, from: column, among: placed, columnCount: columnCount),
+                columnCount: columnCount
             )
         }
+    }
+
+    private static func freeColumnSpan(
+        of span: Span,
+        from column: Int,
+        among placed: [(Span, Int)],
+        columnCount: Int
+    ) -> Int {
+        var columnSpan = 1
+        for nextColumn in (column + 1)..<max(columnCount, column + 1) {
+            let isTaken = placed.contains { other, otherColumn in
+                otherColumn == nextColumn
+                    && other.startMinute < span.endMinute
+                    && span.startMinute < other.endMinute
+            }
+            if isTaken {
+                break
+            }
+            columnSpan += 1
+        }
+        return columnSpan
     }
 }

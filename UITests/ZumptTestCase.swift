@@ -32,6 +32,17 @@ class ZumptTestCase: XCTestCase {
     }
 
     @MainActor
+    func click(_ identifier: String, in app: XCUIApplication) {
+        app.activate()
+        element(identifier, in: app).click()
+    }
+
+    @MainActor
+    func count(of identifier: String, in app: XCUIApplication) -> Int {
+        app.descendants(matching: .any).matching(identifier: identifier).count
+    }
+
+    @MainActor
     func displayedText(of element: XCUIElement) -> String {
         let value = element.value as? String ?? ""
         return value.isEmpty ? element.label : value

@@ -49,6 +49,7 @@
 
                 builder.timed("App Móvel · Daily", day: 1, from: (9, 30), to: (9, 45), in: work),
                 builder.timed("Planejamento", day: 1, from: (11, 0), to: (12, 0), in: work),
+                builder.timed("Planejamento", day: 1, from: (11, 0), to: (12, 0), in: agenda),
                 builder.timed("Acompanhamento squad", day: 1, from: (15, 0), to: (15, 30), in: agenda),
 
                 builder.timed("App Móvel · Daily", day: 2, from: (9, 30), to: (9, 45), in: work),
@@ -59,6 +60,7 @@
                 builder.timed("App Móvel · Daily", day: 3, from: (9, 30), to: (9, 45), in: work),
                 builder.timed("Daily do squad", day: 3, from: (10, 0), to: (10, 15), in: work),
                 builder.timed("Fórum de produto", day: 3, from: (11, 0), to: (12, 0), in: agenda),
+                builder.timed("ENC: Fórum de produto", day: 3, from: (11, 0), to: (12, 0), in: work),
                 builder.timed("Revisão de design", day: 3, from: (11, 30), to: (12, 30), in: work),
                 builder.timed("Fundação / Setup", day: 3, from: (13, 0), to: (14, 0), in: agenda),
                 builder.timed("Daily técnica [Suporte]", day: 3, from: (16, 0), to: (16, 15), in: agenda),
@@ -103,7 +105,7 @@
                 isDeclined: Bool = false
             ) -> CalendarEvent {
                 CalendarEvent(
-                    id: "\(title)-\(day)",
+                    id: "\(eventCalendar.id)-\(title)-\(day)",
                     title: title,
                     start: time(start, on: week.days[day]),
                     end: time(end, on: week.days[day]),
@@ -119,7 +121,7 @@
                     preconditionFailure("Calendar could not add a day to \(start)")
                 }
                 return CalendarEvent(
-                    id: "\(title)-\(day)",
+                    id: "\(eventCalendar.id)-\(title)-\(day)",
                     title: title,
                     start: start,
                     end: end,

@@ -30,7 +30,11 @@ final class CalendarModel {
     }
 
     var visibleEvents: [CalendarEvent] {
-        EventFilter.visible(events, hiddenCalendarIDs: hiddenCalendarIDs)
+        EventFilter.visible(
+            events,
+            hiddenCalendarIDs: hiddenCalendarIDs,
+            calendarOrder: accounts.flatMap(\.calendars).map(\.id)
+        )
     }
 
     var calendarColors: [String: CalendarColor] {

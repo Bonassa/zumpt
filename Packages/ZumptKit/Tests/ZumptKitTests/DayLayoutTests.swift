@@ -69,7 +69,41 @@ struct DayLayoutTests {
 
         #expect(layout.map(\.event.title) == ["Forum", "Design review"])
         #expect(layout.map(\.column) == [0, 1])
+        #expect(layout.map(\.columnSpan) == [1, 1])
         #expect(layout.map(\.columnCount) == [2, 2])
+    }
+
+    @Test func widensAnEventIntoColumnsThatAreFreeDuringItsTime() throws {
+        let calendar = try makeCalendar()
+        let events = [
+            makeEvent(
+                "Workshop",
+                from: try date(2026, 11, 2, hour: 9, in: calendar),
+                to: try date(2026, 11, 2, hour: 12, in: calendar)
+            ),
+            makeEvent(
+                "Planning",
+                from: try date(2026, 11, 2, hour: 9, in: calendar),
+                to: try date(2026, 11, 2, hour: 10, in: calendar)
+            ),
+            makeEvent(
+                "Daily",
+                from: try date(2026, 11, 2, hour: 9, in: calendar),
+                to: try date(2026, 11, 2, hour: 9, minute: 30, in: calendar)
+            ),
+            makeEvent(
+                "Review",
+                from: try date(2026, 11, 2, hour: 10, in: calendar),
+                to: try date(2026, 11, 2, hour: 11, in: calendar)
+            ),
+        ]
+
+        let layout = DayLayout.timedEvents(events, on: try date(2026, 11, 2, in: calendar), calendar: calendar)
+
+        #expect(layout.map(\.event.title) == ["Workshop", "Planning", "Daily", "Review"])
+        #expect(layout.map(\.column) == [0, 1, 2, 1])
+        #expect(layout.map(\.columnSpan) == [1, 1, 1, 2])
+        #expect(layout.map(\.columnCount) == [3, 3, 3, 3])
     }
 
     @Test func keepsBackToBackEventsInASingleColumn() throws {
@@ -122,6 +156,7 @@ struct DayLayoutTests {
 
         #expect(layout.map(\.event.title) == ["A", "B", "C", "D"])
         #expect(layout.map(\.column) == [0, 1, 0, 0])
+        #expect(layout.map(\.columnSpan) == [1, 1, 1, 1])
         #expect(layout.map(\.columnCount) == [2, 2, 2, 1])
     }
 

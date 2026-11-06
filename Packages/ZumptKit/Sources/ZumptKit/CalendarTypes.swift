@@ -69,9 +69,3 @@ public struct CalendarEvent: Identifiable, Hashable, Sendable {
         self.isDeclined = isDeclined
     }
 }
-
-public enum EventFilter {
-    public static func visible(_ events: [CalendarEvent], hiddenCalendarIDs: Set<String>) -> [CalendarEvent] {
-        events.filter { !$0.isDeclined && !hiddenCalendarIDs.contains($0.calendarID) }
-    }
-}

@@ -8,7 +8,7 @@ final class CalendarAccessTests: ZumptTestCase {
         XCTAssertTrue(allowButton.waitForExistence(timeout: 5))
         attachWindowScreenshot(of: app)
 
-        allowButton.click()
+        click("allow-calendar-access", in: app)
 
         assertWeekHeader(in: app, title: "Novembro 2026", number: "Semana 45")
         XCTAssertTrue(element("event-Planejamento", in: app).exists)
