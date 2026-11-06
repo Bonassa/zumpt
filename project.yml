@@ -1,0 +1,72 @@
+name: Zumpt
+
+options:
+  bundleIdPrefix: com.renanbonassa
+  deploymentTarget:
+    macOS: "26.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: CB479TBH8L
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "6.0"
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+
+packages:
+  ZumptKit:
+    path: Packages/ZumptKit
+
+targets:
+  Zumpt:
+    type: application
+    platform: macOS
+    sources:
+      - App
+    dependencies:
+      - package: ZumptKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.renanbonassa.zumpt
+        PRODUCT_NAME: Zumpt
+        CODE_SIGN_ENTITLEMENTS: App/Zumpt.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Zumpt
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+        SWIFT_EMIT_LOC_STRINGS: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+
+  ZumptUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - UITests
+    dependencies:
+      - target: Zumpt
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.renanbonassa.zumpt.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Zumpt
+
+schemes:
+  Zumpt:
+    build:
+      targets:
+        Zumpt: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - ZumptUITests
