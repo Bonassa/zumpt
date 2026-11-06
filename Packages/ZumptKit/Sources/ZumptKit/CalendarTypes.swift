@@ -50,6 +50,7 @@ public struct CalendarEvent: Identifiable, Hashable, Sendable {
     public let isAllDay: Bool
     public let calendarID: String
     public let isDeclined: Bool
+    public let isCanceled: Bool
 
     public init(
         id: String,
@@ -58,7 +59,8 @@ public struct CalendarEvent: Identifiable, Hashable, Sendable {
         end: Date,
         isAllDay: Bool,
         calendarID: String,
-        isDeclined: Bool
+        isDeclined: Bool,
+        isCanceled: Bool
     ) {
         self.id = id
         self.title = title
@@ -67,5 +69,6 @@ public struct CalendarEvent: Identifiable, Hashable, Sendable {
         self.isAllDay = isAllDay
         self.calendarID = calendarID
         self.isDeclined = isDeclined
+        self.isCanceled = isCanceled
     }
 }

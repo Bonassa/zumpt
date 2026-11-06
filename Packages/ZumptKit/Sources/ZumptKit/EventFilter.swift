@@ -6,7 +6,9 @@ public enum EventFilter {
         hiddenCalendarIDs: Set<String>,
         calendarOrder: [String]
     ) -> [CalendarEvent] {
-        let shown = events.filter { !$0.isDeclined && !hiddenCalendarIDs.contains($0.calendarID) }
+        let shown = events.filter {
+            !$0.isDeclined && !$0.isCanceled && !hiddenCalendarIDs.contains($0.calendarID)
+        }
         return mergingCopies(of: shown, calendarOrder: calendarOrder)
     }
 
@@ -27,22 +29,16 @@ public enum EventFilter {
             return lhsRank != rhsRank ? lhsRank < rhsRank : lhs.offset < rhs.offset
         }
 
-        var calendarIDsByMeeting: [MeetingKey: String] = [:]
-        var kept: [CalendarEvent] = []
-        for (_, event) in byCalendarOrder {
+        var seenMeetings: Set<MeetingKey> = []
+        return byCalendarOrder.compactMap { _, event in
             let key = MeetingKey(
                 title: meetingTitle(of: event.title),
                 start: event.start,
                 end: event.end,
                 isAllDay: event.isAllDay
             )
-            if let keptCalendarID = calendarIDsByMeeting[key], keptCalendarID != event.calendarID {
-                continue
-            }
-            calendarIDsByMeeting[key] = event.calendarID
-            kept.append(event)
+            return seenMeetings.insert(key).inserted ? event : nil
         }
-        return kept
     }
 
     private static func meetingTitle(of title: String) -> String {

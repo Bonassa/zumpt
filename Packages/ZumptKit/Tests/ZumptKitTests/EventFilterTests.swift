@@ -3,11 +3,12 @@ import Testing
 import ZumptKit
 
 struct EventFilterTests {
-    @Test func hidesDeclinedEventsAndEventsFromHiddenCalendars() throws {
+    @Test func hidesDeclinedAndCanceledEventsAndEventsFromHiddenCalendars() throws {
         let (start, end) = try meetingTimes()
         let events = [
             makeEvent("Planning", from: start, to: end, calendarID: "work"),
             makeEvent("Happy hour", from: start, to: end, calendarID: "work", isDeclined: true),
+            makeEvent("Cancelado: Retro", from: start, to: end, calendarID: "work", isCanceled: true),
             makeEvent("Holiday", from: start, to: end, calendarID: "holidays"),
             makeEvent("Gym", from: start, to: end, calendarID: "personal"),
         ]
@@ -76,16 +77,17 @@ struct EventFilterTests {
         #expect(visible.count == 2)
     }
 
-    @Test func keepsRepeatedEventsWithinTheSameCalendar() throws {
+    @Test func showsRepeatedInvitesInTheSameCalendarOnce() throws {
         let (start, end) = try meetingTimes()
         let events = [
-            makeEvent("Interview", from: start, to: end, calendarID: "exchange"),
-            makeEvent("Interview", from: start, to: end, calendarID: "exchange"),
+            makeEvent("Daily do squad", from: start, to: end, calendarID: "exchange"),
+            makeEvent("Daily do squad", from: start, to: end, calendarID: "exchange"),
+            makeEvent("[Acompanhamento] 1:1", from: start, to: end, calendarID: "exchange"),
         ]
 
         let visible = EventFilter.visible(events, hiddenCalendarIDs: [], calendarOrder: ["exchange"])
 
-        #expect(visible.count == 2)
+        #expect(visible.map(\.title) == ["Daily do squad", "[Acompanhamento] 1:1"])
     }
 
     @Test func showsAHolidayFromTwoHolidayCalendarsOnce() throws {

@@ -62,10 +62,19 @@
                 builder.timed("Fórum de produto", day: 3, from: (11, 0), to: (12, 0), in: agenda),
                 builder.timed("ENC: Fórum de produto", day: 3, from: (11, 0), to: (12, 0), in: work),
                 builder.timed("Revisão de design", day: 3, from: (11, 30), to: (12, 30), in: work),
+                builder.timed("Revisão de design", day: 3, from: (11, 30), to: (12, 30), in: work, copy: 2),
                 builder.timed("Fundação / Setup", day: 3, from: (13, 0), to: (14, 0), in: agenda),
                 builder.timed("Daily técnica [Suporte]", day: 3, from: (16, 0), to: (16, 15), in: agenda),
 
                 builder.timed("App Móvel · Daily", day: 4, from: (9, 30), to: (9, 45), in: work),
+                builder.timed(
+                    "Cancelado: Retrospectiva",
+                    day: 4,
+                    from: (10, 0),
+                    to: (11, 0),
+                    in: work,
+                    isCanceled: true
+                ),
                 builder.timed("Design system · Follow up", day: 4, from: (14, 30), to: (15, 30), in: agenda),
                 builder.timed("Reunião de alinhamento", day: 4, from: (16, 0), to: (17, 0), in: work),
                 builder.timed("Happy hour", day: 4, from: (18, 0), to: (19, 0), in: agenda, isDeclined: true),
@@ -102,16 +111,19 @@
                 from start: (hour: Int, minute: Int),
                 to end: (hour: Int, minute: Int),
                 in eventCalendar: EventCalendar,
-                isDeclined: Bool = false
+                isDeclined: Bool = false,
+                isCanceled: Bool = false,
+                copy: Int = 1
             ) -> CalendarEvent {
                 CalendarEvent(
-                    id: "\(eventCalendar.id)-\(title)-\(day)",
+                    id: "\(eventCalendar.id)-\(title)-\(day)-\(copy)",
                     title: title,
                     start: time(start, on: week.days[day]),
                     end: time(end, on: week.days[day]),
                     isAllDay: false,
                     calendarID: eventCalendar.id,
-                    isDeclined: isDeclined
+                    isDeclined: isDeclined,
+                    isCanceled: isCanceled
                 )
             }
 
@@ -127,7 +139,8 @@
                     end: end,
                     isAllDay: true,
                     calendarID: eventCalendar.id,
-                    isDeclined: false
+                    isDeclined: false,
+                    isCanceled: false
                 )
             }
 

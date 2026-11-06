@@ -76,6 +76,19 @@ final class CalendarWeekTests: ZumptTestCase {
     }
 
     @MainActor
+    func testShowsRepeatedInvitesOnceAndHidesCanceledMeetings() {
+        let app = launchApp()
+        XCTAssertTrue(element("event-Revisão de design", in: app).waitForExistence(timeout: 5))
+
+        XCTAssertEqual(
+            count(of: "event-Revisão de design", in: app),
+            1,
+            "Copies of an invite in the same calendar are the same meeting"
+        )
+        XCTAssertFalse(element("event-Cancelado: Retrospectiva", in: app).exists, "Canceled meetings stay hidden")
+    }
+
+    @MainActor
     func testKeepsTheWorkdayStartAtTheTopWhenTheAllDayRowChangesHeight() {
         let app = launchApp()
         XCTAssertTrue(element("hour-label-8", in: app).waitForExistence(timeout: 5))

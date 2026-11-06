@@ -32,15 +32,17 @@ func makeEvent(
     to end: Date,
     isAllDay: Bool = false,
     calendarID: String = "work",
-    isDeclined: Bool = false
+    isDeclined: Bool = false,
+    isCanceled: Bool = false
 ) -> CalendarEvent {
     CalendarEvent(
-        id: title,
+        id: "\(calendarID)-\(title)-\(start.timeIntervalSinceReferenceDate)",
         title: title,
         start: start,
         end: end,
         isAllDay: isAllDay,
         calendarID: calendarID,
-        isDeclined: isDeclined
+        isDeclined: isDeclined,
+        isCanceled: isCanceled
     )
 }

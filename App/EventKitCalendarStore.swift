@@ -98,7 +98,8 @@ final class EventKitCalendarStore: CalendarStore {
             end: event.endDate,
             isAllDay: event.isAllDay,
             calendarID: event.calendar?.calendarIdentifier ?? "",
-            isDeclined: event.attendees?.contains { $0.isCurrentUser && $0.participantStatus == .declined } ?? false
+            isDeclined: event.attendees?.contains { $0.isCurrentUser && $0.participantStatus == .declined } ?? false,
+            isCanceled: event.status == .canceled
         )
     }
 }
