@@ -1,15 +1,33 @@
+import AppKit
 import SwiftUI
 import ZumptKit
 
 struct RootView: View {
-    let now: Date
+    let model: CalendarModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            WeekHeader(week: Week(containing: now, calendar: .current))
-            Divider()
-            Spacer(minLength: 0)
+        content
+            .frame(minWidth: 1000, minHeight: 640)
+            .toolbar(removing: .title)
+            .task {
+                await model.observeStoreChanges()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                model.refresh()
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch model.access {
+        case .granted:
+            CalendarScreen(model: model)
+        case .notDetermined, .denied:
+            CalendarAccessView(access: model.access) {
+                Task {
+                    await model.requestAccess()
+                }
+            }
         }
-        .frame(minWidth: 960, minHeight: 600)
     }
 }

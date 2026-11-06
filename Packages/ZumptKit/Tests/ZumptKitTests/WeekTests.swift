@@ -64,21 +64,35 @@ struct WeekTests {
         #expect(dayNumbers(of: week, in: calendar) == [27, 28, 29, 30, 31, 1, 2])
         #expect(week.number == 1)
     }
-}
 
-private func makeCalendar(firstWeekday: Int, timeZone: String = "America/Sao_Paulo") throws -> Calendar {
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.locale = Locale(identifier: "pt_BR")
-    calendar.timeZone = try #require(TimeZone(identifier: timeZone))
-    calendar.firstWeekday = firstWeekday
-    calendar.minimumDaysInFirstWeek = 1
-    return calendar
-}
+    @Test func intervalCoversTheSevenDaysUpToTheNextWeekStart() throws {
+        let calendar = try makeCalendar(firstWeekday: 1)
 
-private func date(_ year: Int, _ month: Int, _ day: Int, hour: Int = 12, in calendar: Calendar) throws -> Date {
-    try #require(calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour)))
-}
+        let interval = Week(containing: try date(2026, 11, 4, in: calendar), calendar: calendar).interval(in: calendar)
 
-private func dayNumbers(of week: Week, in calendar: Calendar) -> [Int] {
-    week.days.map { calendar.component(.day, from: $0) }
+        #expect(interval.start == (try date(2026, 11, 1, hour: 0, in: calendar)))
+        #expect(interval.end == (try date(2026, 11, 8, hour: 0, in: calendar)))
+    }
+
+    @Test func containsDatesFromTheFirstDayUntilTheNextWeekStarts() throws {
+        let calendar = try makeCalendar(firstWeekday: 1)
+        let week = Week(containing: try date(2026, 11, 4, in: calendar), calendar: calendar)
+
+        #expect(week.contains(try date(2026, 11, 1, hour: 0, in: calendar), calendar: calendar))
+        #expect(week.contains(try date(2026, 11, 7, hour: 23, minute: 59, in: calendar), calendar: calendar))
+        #expect(!week.contains(try date(2026, 11, 8, hour: 0, in: calendar), calendar: calendar))
+        #expect(!week.contains(try date(2026, 10, 31, hour: 23, minute: 59, in: calendar), calendar: calendar))
+    }
+
+    @Test func addingWeeksMovesForwardAndBackAcrossTheYear() throws {
+        let calendar = try makeCalendar(firstWeekday: 1)
+        let week = Week(containing: try date(2026, 12, 23, in: calendar), calendar: calendar)
+
+        let next = week.adding(weeks: 1, calendar: calendar)
+        let previous = next.adding(weeks: -1, calendar: calendar)
+
+        #expect(dayNumbers(of: next, in: calendar) == [27, 28, 29, 30, 31, 1, 2])
+        #expect(next.number == 1)
+        #expect(previous == week)
+    }
 }

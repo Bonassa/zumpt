@@ -1,0 +1,23 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCalendarsFullAccessUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zumpt shows your events next to your tasks. It only reads them and never changes anything."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Zumpt mostra seus eventos junto com suas tarefas. Ele só lê os eventos e nunca altera nada."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -17,8 +17,8 @@ struct WeekHeader: View {
                 .foregroundStyle(.secondary)
                 .accessibilityIdentifier("week-header-number")
         }
-        .padding(EdgeInsets(top: 14, leading: 20, bottom: 12, trailing: 20))
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize()
+        .padding(.leading, 4)
     }
 
     private var title: AttributedString {

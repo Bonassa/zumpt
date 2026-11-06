@@ -2,13 +2,13 @@ import SwiftUI
 
 @main
 struct ZumptApp: App {
-    private let launchOptions = LaunchOptions()
+    @State private var model = CalendarModel.make(options: LaunchOptions())
 
     var body: some Scene {
         Window(Text(verbatim: "Zumpt"), id: "main") {
-            RootView(now: launchOptions.now)
+            RootView(model: model)
                 .environment(\.locale, .app)
         }
-        .defaultSize(width: 1280, height: 800)
+        .defaultSize(width: 1440, height: 900)
     }
 }

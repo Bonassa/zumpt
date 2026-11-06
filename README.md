@@ -36,7 +36,9 @@ Change targets and build settings in `project.yml`, never in Xcode, and run any 
 | `Packages/ZumptKit/` | Domain types and logic, with no UI, tested with `swift test` |
 | `UITests/` | End-to-end tests that drive the app |
 
-UI test runs attach a screenshot of the window to the result bundle in `.build/DerivedData/Logs/Test/`.
+UI tests never touch your real Calendar.
+They launch the app with `--calendar-fixture` and `--now`, which only exist in Debug builds, so events, dates and permissions are always the same.
+Each run attaches a screenshot of the window to the result bundle in `.build/DerivedData/Logs/Test/`.
 
 ## Localization
 
