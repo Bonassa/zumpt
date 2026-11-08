@@ -12,6 +12,7 @@ struct DayColumn: View {
 
     @State private var dropMinute: Int?
     @Environment(TaskModel.self) private var taskModel
+    @Environment(TaskSelection.self) private var selection
     @Environment(\.undoManager) private var undoManager
 
     var body: some View {
@@ -54,6 +55,8 @@ struct DayColumn: View {
         .frame(height: WeekGridMetrics.dayHeight)
         .background {
             DayColumnBackground(isWeekend: isWeekend)
+                .contentShape(.rect)
+                .onTapGesture(perform: selection.clear)
         }
         .dropDestination(for: TaskDragItem.self) { items, session in
             dropMinute = nil

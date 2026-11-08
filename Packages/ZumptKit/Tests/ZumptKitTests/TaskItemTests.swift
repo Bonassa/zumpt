@@ -23,6 +23,14 @@ struct TaskTitleTests {
     func rejectsABlankTitle(_ text: String) {
         #expect(TaskTitle.normalized(text) == nil)
     }
+
+    @Test func renamesToTheCleanedUpTitle() {
+        #expect(TaskTitle.renamed("Renovar CNH", to: "  Renovar passaporte ") == "Renovar passaporte")
+    }
+
+    @Test func keepsTheOldTitleWhenTheNewOneIsBlank() {
+        #expect(TaskTitle.renamed("Renovar CNH", to: "   ") == "Renovar CNH")
+    }
 }
 
 struct BacklogTests {

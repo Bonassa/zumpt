@@ -253,6 +253,26 @@
         }
       }
     },
+    "Delete" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir"
+          }
+        }
+      }
+    },
+    "Delete Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir tarefa"
+          }
+        }
+      }
+    },
     "Due %@" : {
       "localizations" : {
         "pt-BR" : {
@@ -493,6 +513,26 @@
         }
       }
     },
+    "Rename" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomear"
+          }
+        }
+      }
+    },
+    "Rename Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomear tarefa"
+          }
+        }
+      }
+    },
     "Reopen" : {
       "localizations" : {
         "pt-BR" : {
@@ -529,6 +569,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tarefas sem horário. Arraste uma para a semana para agendar."
+          }
+        }
+      }
+    },
+    "Title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título"
           }
         }
       }

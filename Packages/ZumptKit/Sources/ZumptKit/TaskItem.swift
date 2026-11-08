@@ -49,6 +49,10 @@ public enum TaskTitle {
             .joined(separator: " ")
         return title.isEmpty ? nil : title
     }
+
+    public static func renamed(_ current: String, to text: String) -> String {
+        normalized(text) ?? current
+    }
 }
 
 public enum Backlog {

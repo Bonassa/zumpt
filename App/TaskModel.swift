@@ -62,6 +62,25 @@ final class TaskModel {
         replace(task, with: toggled, id: id, actionName: actionName, undoManager: undoManager)
     }
 
+    func rename(_ id: UUID, to text: String, undoManager: UndoManager?) {
+        guard let task = tasks.first(where: { $0.id == id }) else {
+            return
+        }
+        var renamed = task
+        renamed.title = TaskTitle.renamed(task.title, to: text)
+        guard renamed.title != task.title else {
+            return
+        }
+        replace(task, with: renamed, id: id, actionName: String(localized: "Rename Task"), undoManager: undoManager)
+    }
+
+    func delete(_ id: UUID, undoManager: UndoManager?) {
+        guard let task = tasks.first(where: { $0.id == id }) else {
+            return
+        }
+        replace(task, with: nil, id: id, actionName: String(localized: "Delete Task"), undoManager: undoManager)
+    }
+
     func returnOverdueTasks() {
         let overdue = OverdueTasks.returned(from: tasks, now: now(), calendar: calendar)
         guard !overdue.isEmpty else {

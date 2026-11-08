@@ -14,6 +14,10 @@ extension Color {
         light: NSColor(srgbRed: 163 / 255, green: 39 / 255, blue: 31 / 255, alpha: 1),
         dark: NSColor(srgbRed: 255 / 255, green: 123 / 255, blue: 114 / 255, alpha: 1)
     )
+    static let selectedTaskFill = Color(
+        light: NSColor(srgbRed: 220 / 255, green: 231 / 255, blue: 251 / 255, alpha: 1),
+        dark: NSColor(srgbRed: 31 / 255, green: 47 / 255, blue: 77 / 255, alpha: 1)
+    )
     static let doneTaskFill = Color(
         light: NSColor(srgbRed: 246 / 255, green: 246 / 255, blue: 248 / 255, alpha: 1),
         dark: NSColor(white: 0.15, alpha: 1)

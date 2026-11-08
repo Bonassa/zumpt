@@ -5,6 +5,8 @@ struct CalendarScreen: View {
     let model: CalendarModel
     let taskModel: TaskModel
 
+    @State private var selection = TaskSelection()
+
     var body: some View {
         NavigationSplitView {
             CalendarSidebar(model: model)
@@ -26,6 +28,7 @@ struct CalendarScreen: View {
                 BacklogPanel(model: taskModel)
             }
             .environment(taskModel)
+            .environment(selection)
             .background(Color(nsColor: .textBackgroundColor))
             .toolbar {
                 ToolbarItem(placement: .navigation) {

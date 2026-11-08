@@ -171,15 +171,23 @@ private struct BacklogHeader: View {
 private struct BacklogRow: View {
     let task: TaskItem
 
+    @Environment(TaskModel.self) private var model
+    @Environment(TaskSelection.self) private var selection
+    @Environment(\.undoManager) private var undoManager
     @Environment(\.locale) private var locale
 
     var body: some View {
+        let isSelected = selection.selectedID == task.id
         HStack(spacing: 10) {
             CompletionButton(task: task, size: 16)
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: task.title)
-                    .font(.system(size: 13, weight: .medium))
-                    .lineLimit(2)
+                if selection.renamingID == task.id {
+                    TaskTitleField(task: task, font: .system(size: 13, weight: .medium))
+                } else {
+                    Text(verbatim: task.title)
+                        .font(.system(size: 13, weight: .medium))
+                        .lineLimit(2)
+                }
                 if task.isOverdue, let missedStart = task.missedStart {
                     Text("Due \(missedStart.formatted(Self.dueDateStyle(locale: locale)))")
                         .font(.system(size: 11.5))
@@ -192,14 +200,27 @@ private struct BacklogRow: View {
         .padding(.vertical, 8)
         .padding(.leading, 10)
         .padding(.trailing, 8)
-        .background(Color.backlogCard, in: .rect(cornerRadius: 8))
+        .background(isSelected ? Color.selectedTaskFill : Color.backlogCard, in: .rect(cornerRadius: 8))
         .overlay {
             RoundedRectangle(cornerRadius: 8)
-                .strokeBorder(Color.backlogCardBorder, lineWidth: 1)
+                .strokeBorder(isSelected ? Color.task : Color.backlogCardBorder, lineWidth: isSelected ? 2 : 1)
         }
         .contentShape(.rect(cornerRadius: 8))
+        .onTapGesture {
+            selection.select(task.id)
+        }
+        .simultaneousGesture(
+            TapGesture(count: 2).onEnded {
+                selection.beginRenaming(task.id)
+            }
+        )
+        .contextMenu {
+            TaskContextMenu(task: task, model: model, selection: selection, undoManager: undoManager)
+        }
+        .taskKeyboardHandling(for: task)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(verbatim: task.title))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("backlog-task-\(task.title)")
     }
 
