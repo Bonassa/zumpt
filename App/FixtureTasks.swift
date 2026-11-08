@@ -19,6 +19,11 @@
                         builder.scheduled("Revisar contrato", day: 5, at: (11, 0)),
                         builder.scheduled("Ligar para o banco", day: 5, at: (14, 0)),
                     ]
+                case "overdue":
+                    [
+                        builder.scheduled("Enviar NF de outubro", daysFromToday: -1, at: (10, 0)),
+                        builder.scheduled("Pagar boleto", daysFromToday: 0, at: (9, 0)),
+                    ]
                 default:
                     preconditionFailure("Unknown task fixture \(name)")
                 }
@@ -36,11 +41,31 @@
 
             func scheduled(
                 _ title: String,
+                daysFromToday: Int,
+                at time: (hour: Int, minute: Int)
+            ) -> TaskItem {
+                guard let day = calendar.date(byAdding: .day, value: daysFromToday, to: calendar.startOfDay(for: now))
+                else {
+                    preconditionFailure("Calendar could not add \(daysFromToday) days to \(now)")
+                }
+                return scheduled(title, on: day, at: time, isDone: false)
+            }
+
+            func scheduled(
+                _ title: String,
                 day: Int,
                 at time: (hour: Int, minute: Int),
                 isDone: Bool = false
             ) -> TaskItem {
-                let day = week.days[day]
+                scheduled(title, on: week.days[day], at: time, isDone: isDone)
+            }
+
+            private func scheduled(
+                _ title: String,
+                on day: Date,
+                at time: (hour: Int, minute: Int),
+                isDone: Bool
+            ) -> TaskItem {
                 guard let start = calendar.date(bySettingHour: time.hour, minute: time.minute, second: 0, of: day)
                 else {
                     preconditionFailure("Calendar could not set \(time) on \(day)")

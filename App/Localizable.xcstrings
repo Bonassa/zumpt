@@ -253,6 +253,16 @@
         }
       }
     },
+    "Due %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Venceu %@"
+          }
+        }
+      }
+    },
     "Every %lld days" : {
       "localizations" : {
         "pt-BR" : {
@@ -449,6 +459,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Organizador"
+          }
+        }
+      }
+    },
+    "Overdue" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atrasadas"
           }
         }
       }

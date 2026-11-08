@@ -28,7 +28,7 @@ struct BacklogPanel: View {
                     .padding(.horizontal, 16)
             }
             ScrollView(.vertical) {
-                LazyVStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 6) {
                     if backlog.isEmpty && !isAddingTask {
                         Text("Press ⌘N to add a task.")
                             .font(.system(size: 12))
@@ -36,10 +36,22 @@ struct BacklogPanel: View {
                             .padding(.horizontal, 2)
                             .accessibilityIdentifier("backlog-empty")
                     }
-                    ForEach(backlog) { task in
-                        BacklogRow(task: task)
-                            .draggable(TaskDragItem(id: task.id))
+                    let overdue = backlog.filter(\.isOverdue)
+                    if !overdue.isEmpty {
+                        Text("Overdue")
+                            .font(.system(size: 11, weight: .semibold))
+                            .tracking(0.44)
+                            .textCase(.uppercase)
+                            .foregroundStyle(Color.overdue)
+                            .padding(.horizontal, 2)
+                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityIdentifier("backlog-overdue-header")
+                        rows(overdue)
+                        if overdue.count < backlog.count {
+                            Color.clear.frame(height: 4)
+                        }
                     }
+                    rows(backlog.filter { !$0.isOverdue })
                 }
                 .animation(.snappy(duration: 0.2), value: backlog.map(\.id))
                 .padding(.horizontal, 16)
@@ -76,6 +88,13 @@ struct BacklogPanel: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("backlog")
         .focusedSceneValue(\.newTask, beginNewTask)
+    }
+
+    private func rows(_ tasks: [TaskItem]) -> some View {
+        ForEach(tasks) { task in
+            BacklogRow(task: task)
+                .draggable(TaskDragItem(id: task.id))
+        }
     }
 
     private var newTaskField: some View {
@@ -152,13 +171,23 @@ private struct BacklogHeader: View {
 private struct BacklogRow: View {
     let task: TaskItem
 
+    @Environment(\.locale) private var locale
+
     var body: some View {
         HStack(spacing: 10) {
             CompletionButton(task: task, size: 16)
-            Text(verbatim: task.title)
-                .font(.system(size: 13, weight: .medium))
-                .lineLimit(2)
-                .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: task.title)
+                    .font(.system(size: 13, weight: .medium))
+                    .lineLimit(2)
+                if task.isOverdue, let missedStart = task.missedStart {
+                    Text("Due \(missedStart.formatted(Self.dueDateStyle(locale: locale)))")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(Color.overdue)
+                        .accessibilityIdentifier("backlog-task-due-\(task.title)")
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
         }
         .padding(.vertical, 8)
         .padding(.leading, 10)
@@ -172,6 +201,10 @@ private struct BacklogRow: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(verbatim: task.title))
         .accessibilityIdentifier("backlog-task-\(task.title)")
+    }
+
+    private static func dueDateStyle(locale: Locale) -> Date.FormatStyle {
+        Date.FormatStyle(locale: locale).weekday(.abbreviated).month(.abbreviated).day()
     }
 }
 

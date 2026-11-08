@@ -30,9 +30,17 @@ func makeTask(
     _ title: String,
     createdAt: Date = .distantPast,
     scheduledAt: Date? = nil,
-    completedAt: Date? = nil
+    completedAt: Date? = nil,
+    missedAt: Date? = nil
 ) -> TaskItem {
-    TaskItem(id: UUID(), title: title, createdAt: createdAt, scheduledStart: scheduledAt, completedAt: completedAt)
+    TaskItem(
+        id: UUID(),
+        title: title,
+        createdAt: createdAt,
+        scheduledStart: scheduledAt,
+        completedAt: completedAt,
+        missedStart: missedAt
+    )
 }
 
 func makeEvent(

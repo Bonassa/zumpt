@@ -55,6 +55,19 @@ struct BacklogTests {
         #expect(tasks.map(\.isDone) == [false, true])
     }
 
+    @Test func putsOverdueTasksFirstWithTheOldestOnTop() throws {
+        let calendar = try makeCalendar()
+        let tasks = [
+            makeTask("Renovar CNH", createdAt: try date(2026, 11, 4, hour: 9, in: calendar)),
+            makeTask("Enviar NF", missedAt: try date(2026, 11, 3, hour: 10, in: calendar)),
+            makeTask("Pagar IPVA", missedAt: try date(2026, 11, 2, hour: 16, in: calendar)),
+            makeTask("Marcar dentista", createdAt: try date(2026, 11, 1, hour: 9, in: calendar)),
+        ]
+
+        #expect(Backlog.tasks(tasks).map(\.title) == ["Pagar IPVA", "Enviar NF", "Renovar CNH", "Marcar dentista"])
+        #expect(Backlog.tasks(tasks).map(\.isOverdue) == [true, true, false, false])
+    }
+
     @Test func endsAScheduledTaskThirtyMinutesAfterItStarts() throws {
         let calendar = try makeCalendar()
         let task = makeTask("Revisar contrato", scheduledAt: try date(2026, 11, 4, hour: 14, in: calendar))

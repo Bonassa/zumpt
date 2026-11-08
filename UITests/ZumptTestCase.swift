@@ -14,11 +14,12 @@ class ZumptTestCase: XCTestCase {
         language: String = "pt-BR",
         locale: String = "pt_BR",
         tasksStore: String = "memory",
-        taskFixture: String? = nil
+        taskFixture: String? = nil,
+        now: String = fixedNow
     ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
-            "--now", Self.fixedNow,
+            "--now", now,
             "--calendar-fixture", calendarAccess,
             "--tasks-store", tasksStore,
             "-AppleLanguages", "(\(language))",

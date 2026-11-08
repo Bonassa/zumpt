@@ -9,6 +9,7 @@ final class TaskRecord {
     var createdAt: Date = Date.distantPast
     var scheduledStart: Date?
     var completedAt: Date?
+    var missedStart: Date?
 
     init(_ task: TaskItem) {
         id = task.id
@@ -21,7 +22,8 @@ final class TaskRecord {
             title: title,
             createdAt: createdAt,
             scheduledStart: scheduledStart,
-            completedAt: completedAt
+            completedAt: completedAt,
+            missedStart: missedStart
         )
     }
 
@@ -30,5 +32,6 @@ final class TaskRecord {
         createdAt = task.createdAt
         scheduledStart = task.scheduledStart
         completedAt = task.completedAt
+        missedStart = task.missedStart
     }
 }

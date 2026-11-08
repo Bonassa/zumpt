@@ -10,14 +10,20 @@ final class TaskModel {
 
     let now: () -> Date
 
+    private let calendar: Calendar
     private let context: ModelContext
     private let logger = Logger(subsystem: "com.renanbonassa.zumpt", category: "tasks")
+    @ObservationIgnored private var dayChangeObserver: DayChangeObserver?
 
-    init(container: ModelContainer, now: @escaping () -> Date) {
+    init(container: ModelContainer, calendar: Calendar, now: @escaping () -> Date) {
         context = ModelContext(container)
         context.autosaveEnabled = false
+        self.calendar = calendar
         self.now = now
         reload()
+        dayChangeObserver = DayChangeObserver { [weak self] in
+            self?.returnOverdueTasks()
+        }
     }
 
     var backlog: [TaskItem] {
@@ -40,6 +46,9 @@ final class TaskModel {
         }
         var moved = task
         moved.scheduledStart = start
+        if start != nil {
+            moved.missedStart = nil
+        }
         replace(task, with: moved, id: id, actionName: String(localized: "Move Task"), undoManager: undoManager)
     }
 
@@ -51,6 +60,17 @@ final class TaskModel {
         toggled.completedAt = task.isDone ? nil : now()
         let actionName = task.isDone ? String(localized: "Reopen Task") : String(localized: "Complete Task")
         replace(task, with: toggled, id: id, actionName: actionName, undoManager: undoManager)
+    }
+
+    func returnOverdueTasks() {
+        let overdue = OverdueTasks.returned(from: tasks, now: now(), calendar: calendar)
+        guard !overdue.isEmpty else {
+            return
+        }
+        for task in overdue {
+            apply(task, id: task.id)
+        }
+        save()
     }
 
     private func replace(
@@ -68,6 +88,11 @@ final class TaskModel {
     }
 
     private func write(_ task: TaskItem?, id: UUID) {
+        apply(task, id: id)
+        save()
+    }
+
+    private func apply(_ task: TaskItem?, id: UUID) {
         let record = record(id: id)
         switch (record, task) {
         case (let record?, let task?):
@@ -79,7 +104,6 @@ final class TaskModel {
         case (nil, nil):
             return
         }
-        save()
     }
 
     private func record(id: UUID) -> TaskRecord? {
@@ -114,12 +138,13 @@ final class TaskModel {
 
 extension TaskModel {
     static func make(options: LaunchOptions, calendar: Calendar) -> TaskModel {
-        let model = TaskModel(container: container(for: options), now: options.now)
+        let model = TaskModel(container: container(for: options), calendar: calendar, now: options.now)
         #if DEBUG
             if let fixture = options.taskFixture {
                 model.seed(FixtureTasks.tasks(named: fixture, now: options.now(), calendar: calendar))
             }
         #endif
+        model.returnOverdueTasks()
         return model
     }
 
@@ -144,8 +169,9 @@ extension TaskModel {
     #if DEBUG
         private func seed(_ fixtureTasks: [TaskItem]) {
             for task in fixtureTasks {
-                write(task, id: task.id)
+                apply(task, id: task.id)
             }
+            save()
         }
     #endif
 }
