@@ -41,6 +41,7 @@ struct BacklogPanel: View {
                             .draggable(TaskDragItem(id: task.id))
                     }
                 }
+                .animation(.snappy(duration: 0.2), value: backlog.map(\.id))
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
@@ -152,19 +153,25 @@ private struct BacklogRow: View {
     let task: TaskItem
 
     var body: some View {
-        Text(verbatim: task.title)
-            .font(.system(size: 13, weight: .medium))
-            .lineLimit(2)
-            .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 10)
-            .background(Color.backlogCard, in: .rect(cornerRadius: 8))
-            .overlay {
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.backlogCardBorder, lineWidth: 1)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("backlog-task-\(task.title)")
+        HStack(spacing: 10) {
+            CompletionButton(task: task, size: 16)
+            Text(verbatim: task.title)
+                .font(.system(size: 13, weight: .medium))
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
+        }
+        .padding(.vertical, 8)
+        .padding(.leading, 10)
+        .padding(.trailing, 8)
+        .background(Color.backlogCard, in: .rect(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(Color.backlogCardBorder, lineWidth: 1)
+        }
+        .contentShape(.rect(cornerRadius: 8))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text(verbatim: task.title))
+        .accessibilityIdentifier("backlog-task-\(task.title)")
     }
 }
 

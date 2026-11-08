@@ -9,9 +9,10 @@ struct DayColumn: View {
     let nowMinute: Int?
     let calendar: Calendar
     @Binding var selectedEventID: String?
-    let dropTask: (UUID, Date) -> Void
 
     @State private var dropMinute: Int?
+    @Environment(TaskModel.self) private var taskModel
+    @Environment(\.undoManager) private var undoManager
 
     var body: some View {
         GeometryReader { proxy in
@@ -58,7 +59,7 @@ struct DayColumn: View {
             dropMinute = nil
             let start = TaskDrop.start(atMinute: Self.dropMinute(at: session.location), on: day, calendar: calendar)
             for item in items {
-                dropTask(item.id, start)
+                taskModel.move(item.id, to: start, undoManager: undoManager)
             }
         }
         .onDropSessionUpdated { session in

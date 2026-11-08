@@ -8,6 +8,7 @@ final class TaskRecord {
     var title: String = ""
     var createdAt: Date = Date.distantPast
     var scheduledStart: Date?
+    var completedAt: Date?
 
     init(_ task: TaskItem) {
         id = task.id
@@ -15,12 +16,19 @@ final class TaskRecord {
     }
 
     var task: TaskItem {
-        TaskItem(id: id, title: title, createdAt: createdAt, scheduledStart: scheduledStart)
+        TaskItem(
+            id: id,
+            title: title,
+            createdAt: createdAt,
+            scheduledStart: scheduledStart,
+            completedAt: completedAt
+        )
     }
 
     func update(from task: TaskItem) {
         title = task.title
         createdAt = task.createdAt
         scheduledStart = task.scheduledStart
+        completedAt = task.completedAt
     }
 }

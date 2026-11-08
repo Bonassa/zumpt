@@ -5,8 +5,6 @@ struct CalendarScreen: View {
     let model: CalendarModel
     let taskModel: TaskModel
 
-    @Environment(\.undoManager) private var undoManager
-
     var body: some View {
         NavigationSplitView {
             CalendarSidebar(model: model)
@@ -20,16 +18,14 @@ struct CalendarScreen: View {
                         tasks: taskModel.tasks,
                         colors: model.calendarColors,
                         calendar: model.calendar,
-                        now: model.now(),
-                        dropTask: { id, start in
-                            taskModel.move(id, to: start, undoManager: undoManager)
-                        }
+                        now: model.now()
                     )
                 }
                 .environment(model)
                 Rectangle().fill(Color.gridLine).frame(width: 1)
                 BacklogPanel(model: taskModel)
             }
+            .environment(taskModel)
             .background(Color(nsColor: .textBackgroundColor))
             .toolbar {
                 ToolbarItem(placement: .navigation) {

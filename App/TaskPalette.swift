@@ -10,6 +10,14 @@ extension Color {
         light: .white,
         dark: NSColor(white: 0.17, alpha: 1)
     )
+    static let doneTaskFill = Color(
+        light: NSColor(srgbRed: 246 / 255, green: 246 / 255, blue: 248 / 255, alpha: 1),
+        dark: NSColor(white: 0.15, alpha: 1)
+    )
+    static let doneTaskBorder = Color(
+        light: NSColor(srgbRed: 207 / 255, green: 206 / 255, blue: 214 / 255, alpha: 1),
+        dark: NSColor(white: 0.32, alpha: 1)
+    )
     static let backlogBackground = Color(
         light: NSColor(srgbRed: 0.98, green: 0.98, blue: 0.988, alpha: 1),
         dark: NSColor(white: 0.14, alpha: 1)

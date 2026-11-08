@@ -203,6 +203,36 @@
         }
       }
     },
+    "Complete" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluir"
+          }
+        }
+      }
+    },
+    "Complete %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluir %@"
+          }
+        }
+      }
+    },
+    "Complete Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluir tarefa"
+          }
+        }
+      }
+    },
     "Connect your calendar" : {
       "localizations" : {
         "pt-BR" : {
@@ -439,6 +469,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Semana anterior"
+          }
+        }
+      }
+    },
+    "Reopen" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reabrir"
+          }
+        }
+      }
+    },
+    "Reopen %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reabrir %@"
+          }
+        }
+      }
+    },
+    "Reopen Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reabrir tarefa"
           }
         }
       }

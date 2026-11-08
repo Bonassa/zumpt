@@ -47,6 +47,14 @@ struct BacklogTests {
         #expect(Backlog.tasks(tasks).map(\.title) == ["Renovar CNH"])
     }
 
+    @Test func leavesDoneTasksOutOfTheBacklog() throws {
+        let doneAt = try date(2026, 11, 4, hour: 9, in: try makeCalendar())
+        let tasks = [makeTask("Renovar CNH"), makeTask("Marcar dentista", completedAt: doneAt)]
+
+        #expect(Backlog.tasks(tasks).map(\.title) == ["Renovar CNH"])
+        #expect(tasks.map(\.isDone) == [false, true])
+    }
+
     @Test func endsAScheduledTaskThirtyMinutesAfterItStarts() throws {
         let calendar = try makeCalendar()
         let task = makeTask("Revisar contrato", scheduledAt: try date(2026, 11, 4, hour: 14, in: calendar))

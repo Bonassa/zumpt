@@ -15,6 +15,7 @@
                     ]
                 case "week":
                     [
+                        builder.scheduled("Pagar fatura do cartão", day: 1, at: (8, 30), isDone: true),
                         builder.scheduled("Revisar contrato", day: 5, at: (11, 0)),
                         builder.scheduled("Ligar para o banco", day: 5, at: (14, 0)),
                     ]
@@ -33,7 +34,12 @@
                 TaskItem(id: UUID(), title: title, createdAt: now.addingTimeInterval(-Double(hours) * 3600))
             }
 
-            func scheduled(_ title: String, day: Int, at time: (hour: Int, minute: Int)) -> TaskItem {
+            func scheduled(
+                _ title: String,
+                day: Int,
+                at time: (hour: Int, minute: Int),
+                isDone: Bool = false
+            ) -> TaskItem {
                 let day = week.days[day]
                 guard let start = calendar.date(bySettingHour: time.hour, minute: time.minute, second: 0, of: day)
                 else {
@@ -43,7 +49,8 @@
                     id: UUID(),
                     title: title,
                     createdAt: now.addingTimeInterval(-86_400),
-                    scheduledStart: start
+                    scheduledStart: start,
+                    completedAt: isDone ? start.addingTimeInterval(1800) : nil
                 )
             }
         }

@@ -263,6 +263,17 @@ struct DayLayoutTests {
         #expect(layout.map(\.columnCount) == [2, 2])
     }
 
+    @Test func keepsADoneTaskInItsPlace() throws {
+        let calendar = try makeCalendar()
+        let start = try date(2026, 11, 2, hour: 9, in: calendar)
+        let task = makeTask("Pagar fatura", scheduledAt: start, completedAt: start.addingTimeInterval(600))
+
+        let layout = timedItems([], tasks: [task], on: start, calendar: calendar)
+
+        #expect(layout.map(\.item) == [.task(task)])
+        #expect(layout.map(\.startMinute) == [540])
+    }
+
     @Test func leavesOutTasksFromOtherDaysAndUnscheduledTasks() throws {
         let calendar = try makeCalendar()
         let tasks = [

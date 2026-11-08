@@ -7,12 +7,24 @@ public struct TaskItem: Identifiable, Hashable, Sendable {
     public var title: String
     public var createdAt: Date
     public var scheduledStart: Date?
+    public var completedAt: Date?
 
-    public init(id: UUID, title: String, createdAt: Date, scheduledStart: Date? = nil) {
+    public init(
+        id: UUID,
+        title: String,
+        createdAt: Date,
+        scheduledStart: Date? = nil,
+        completedAt: Date? = nil
+    ) {
         self.id = id
         self.title = title
         self.createdAt = createdAt
         self.scheduledStart = scheduledStart
+        self.completedAt = completedAt
+    }
+
+    public var isDone: Bool {
+        completedAt != nil
     }
 
     public var scheduledEnd: Date? {
@@ -35,7 +47,7 @@ public enum TaskTitle {
 public enum Backlog {
     public static func tasks(_ tasks: [TaskItem]) -> [TaskItem] {
         tasks
-            .filter { $0.scheduledStart == nil }
+            .filter { $0.scheduledStart == nil && !$0.isDone }
             .sorted { ($0.createdAt, $0.id.uuidString) > ($1.createdAt, $1.id.uuidString) }
     }
 }

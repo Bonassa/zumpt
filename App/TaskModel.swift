@@ -43,6 +43,16 @@ final class TaskModel {
         replace(task, with: moved, id: id, actionName: String(localized: "Move Task"), undoManager: undoManager)
     }
 
+    func toggleCompletion(_ id: UUID, undoManager: UndoManager?) {
+        guard let task = tasks.first(where: { $0.id == id }) else {
+            return
+        }
+        var toggled = task
+        toggled.completedAt = task.isDone ? nil : now()
+        let actionName = task.isDone ? String(localized: "Reopen Task") : String(localized: "Complete Task")
+        replace(task, with: toggled, id: id, actionName: actionName, undoManager: undoManager)
+    }
+
     private func replace(
         _ oldTask: TaskItem?,
         with newTask: TaskItem?,
