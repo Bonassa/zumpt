@@ -3,22 +3,27 @@ import ZumptKit
 
 struct CalendarScreen: View {
     let model: CalendarModel
+    let taskModel: TaskModel
 
     var body: some View {
         NavigationSplitView {
             CalendarSidebar(model: model)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } detail: {
-            TimelineView(.everyMinute) { _ in
-                WeekGrid(
-                    week: model.week,
-                    events: model.visibleEvents,
-                    colors: model.calendarColors,
-                    calendar: model.calendar,
-                    now: model.now()
-                )
+            HStack(spacing: 0) {
+                TimelineView(.everyMinute) { _ in
+                    WeekGrid(
+                        week: model.week,
+                        events: model.visibleEvents,
+                        colors: model.calendarColors,
+                        calendar: model.calendar,
+                        now: model.now()
+                    )
+                }
+                .environment(model)
+                Rectangle().fill(Color.gridLine).frame(width: 1)
+                BacklogPanel(model: taskModel)
             }
-            .environment(model)
             .background(Color(nsColor: .textBackgroundColor))
             .toolbar {
                 ToolbarItem(placement: .navigation) {

@@ -39,8 +39,16 @@ Change targets and build settings in `project.yml`, never in Xcode, and run any 
 | `Packages/ZumptKit/` | Domain types and logic, with no UI, tested with `swift test` |
 | `UITests/` | End-to-end tests that drive the app |
 
-UI tests never touch your real Calendar.
-They launch the app with `--calendar-fixture` and `--now`, which only exist in Debug builds, so events, dates and permissions are always the same.
+UI tests never touch your real Calendar or your real tasks.
+They launch the app with options that only exist in Debug builds, so events, tasks, dates and permissions are always the same:
+
+| Option | What it does |
+| --- | --- |
+| `--calendar-fixture granted\|denied\|notDetermined` | Shows fictional calendars and events instead of the Calendar app, with that access state |
+| `--now <ISO 8601 date>` | Starts the clock at that moment, and it keeps ticking from there |
+| `--tasks-store memory\|<file>` | Keeps tasks in memory, or in a file inside the app's temporary folder; with `--calendar-fixture` it defaults to `memory` |
+| `--task-fixture <name>` | Adds a fictional set of tasks at launch, such as `backlog` |
+
 Each run attaches a screenshot of the window to the result bundle in `.build/DerivedData/Logs/Test/`.
 
 ## Localization

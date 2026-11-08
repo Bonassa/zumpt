@@ -71,6 +71,58 @@
         }
       }
     },
+    "%lld tasks" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld task"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tasks"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No tasks"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefa"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefas"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Nenhuma tarefa"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld yes" : {
       "localizations" : {
         "pt-BR" : {
@@ -127,6 +179,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aguardando resposta"
+          }
+        }
+      }
+    },
+    "Backlog" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backlog"
           }
         }
       }
@@ -281,6 +343,26 @@
         }
       }
     },
+    "New Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova tarefa"
+          }
+        }
+      }
+    },
+    "New task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova tarefa"
+          }
+        }
+      }
+    },
     "Next week" : {
       "localizations" : {
         "pt-BR" : {
@@ -327,6 +409,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Organizador"
+          }
+        }
+      }
+    },
+    "Press ⌘N to add a task." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressione ⌘N para adicionar uma tarefa."
           }
         }
       }

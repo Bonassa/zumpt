@@ -12,15 +12,21 @@ class ZumptTestCase: XCTestCase {
     func launchApp(
         calendarAccess: String = "granted",
         language: String = "pt-BR",
-        locale: String = "pt_BR"
+        locale: String = "pt_BR",
+        tasksStore: String = "memory",
+        taskFixture: String? = nil
     ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "--now", Self.fixedNow,
             "--calendar-fixture", calendarAccess,
+            "--tasks-store", tasksStore,
             "-AppleLanguages", "(\(language))",
             "-AppleLocale", locale,
         ]
+        if let taskFixture {
+            app.launchArguments += ["--task-fixture", taskFixture]
+        }
         app.launch()
         addTeardownBlock { @MainActor in app.terminate() }
         return app
@@ -35,6 +41,14 @@ class ZumptTestCase: XCTestCase {
     func click(_ identifier: String, in app: XCUIApplication) {
         app.activate()
         element(identifier, in: app).click()
+    }
+
+    @MainActor
+    func addTask(_ title: String, in app: XCUIApplication) {
+        app.typeKey("n", modifierFlags: .command)
+        XCTAssertTrue(element("new-task-field", in: app).waitForExistence(timeout: 2))
+        app.typeText(title)
+        app.typeKey(.return, modifierFlags: [])
     }
 
     @MainActor
