@@ -26,6 +26,7 @@ struct TaskBlock: View {
         .clipShape(.rect(cornerRadius: 6))
         .shadow(color: .black.opacity(0.08), radius: 1, y: 1)
         .contentShape(.rect(cornerRadius: 6))
+        .draggable(TaskDragItem(id: task.id))
         .help(Text(verbatim: "\(task.title) · \(timeRange)"))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: "\(task.title), \(timeRange)"))
@@ -33,9 +34,11 @@ struct TaskBlock: View {
     }
 
     private var timeRange: String {
-        guard let start = task.scheduledStart, let end = task.scheduledEnd else {
-            return ""
-        }
+        task.scheduledStart.map { Self.timeRange(from: $0, locale: locale) } ?? ""
+    }
+
+    static func timeRange(from start: Date, locale: Locale) -> String {
+        let end = start.addingTimeInterval(TimeInterval(TaskItem.durationInMinutes * 60))
         return (start..<end).formatted(Date.IntervalFormatStyle(date: .omitted, time: .shortened, locale: locale))
     }
 }

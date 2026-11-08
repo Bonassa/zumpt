@@ -5,6 +5,8 @@ struct CalendarScreen: View {
     let model: CalendarModel
     let taskModel: TaskModel
 
+    @Environment(\.undoManager) private var undoManager
+
     var body: some View {
         NavigationSplitView {
             CalendarSidebar(model: model)
@@ -18,7 +20,10 @@ struct CalendarScreen: View {
                         tasks: taskModel.tasks,
                         colors: model.calendarColors,
                         calendar: model.calendar,
-                        now: model.now()
+                        now: model.now(),
+                        dropTask: { id, start in
+                            taskModel.move(id, to: start, undoManager: undoManager)
+                        }
                     )
                 }
                 .environment(model)

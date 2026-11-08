@@ -5,6 +5,7 @@ struct BacklogPanel: View {
     let model: TaskModel
 
     @State private var isAddingTask = false
+    @State private var isDropTargeted = false
     @State private var draft = ""
     @FocusState private var isNewTaskFieldFocused: Bool
     @Environment(\.undoManager) private var undoManager
@@ -14,8 +15,14 @@ struct BacklogPanel: View {
     var body: some View {
         let backlog = model.backlog
         VStack(alignment: .leading, spacing: 12) {
-            BacklogHeader(count: backlog.count, addTask: beginNewTask)
-                .padding(.horizontal, 16)
+            VStack(alignment: .leading, spacing: 3) {
+                BacklogHeader(count: backlog.count, addTask: beginNewTask)
+                Text("Tasks without a time. Drag one into the week to schedule it.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 16)
             if isAddingTask {
                 newTaskField
                     .padding(.horizontal, 16)
@@ -31,6 +38,7 @@ struct BacklogPanel: View {
                     }
                     ForEach(backlog) { task in
                         BacklogRow(task: task)
+                            .draggable(TaskDragItem(id: task.id))
                     }
                 }
                 .padding(.horizontal, 16)
@@ -42,6 +50,28 @@ struct BacklogPanel: View {
         .frame(width: Self.width)
         .frame(maxHeight: .infinity, alignment: .top)
         .background(Color.backlogBackground)
+        .overlay {
+            if isDropTargeted {
+                Rectangle()
+                    .fill(Color.task.opacity(0.06))
+                    .strokeBorder(Color.task, lineWidth: 2)
+                    .allowsHitTesting(false)
+            }
+        }
+        .dropDestination(for: TaskDragItem.self) { items, _ in
+            isDropTargeted = false
+            for item in items {
+                model.move(item.id, to: nil, undoManager: undoManager)
+            }
+        }
+        .onDropSessionUpdated { session in
+            switch session.phase {
+            case .entering, .active:
+                isDropTargeted = session.localSession != nil
+            default:
+                isDropTargeted = false
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("backlog")
         .focusedSceneValue(\.newTask, beginNewTask)

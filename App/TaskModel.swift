@@ -34,6 +34,15 @@ final class TaskModel {
         return task
     }
 
+    func move(_ id: UUID, to start: Date?, undoManager: UndoManager?) {
+        guard let task = tasks.first(where: { $0.id == id }), task.scheduledStart != start else {
+            return
+        }
+        var moved = task
+        moved.scheduledStart = start
+        replace(task, with: moved, id: id, actionName: String(localized: "Move Task"), undoManager: undoManager)
+    }
+
     private func replace(
         _ oldTask: TaskItem?,
         with newTask: TaskItem?,

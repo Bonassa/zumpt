@@ -343,6 +343,16 @@
         }
       }
     },
+    "Move Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover tarefa"
+          }
+        }
+      }
+    },
     "New Task" : {
       "localizations" : {
         "pt-BR" : {
@@ -429,6 +439,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Semana anterior"
+          }
+        }
+      }
+    },
+    "Tasks without a time. Drag one into the week to schedule it." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarefas sem horário. Arraste uma para a semana para agendar."
           }
         }
       }

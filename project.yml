@@ -39,6 +39,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: App/Zumpt.entitlements
         ENABLE_HARDENED_RUNTIME: YES
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: App/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: Zumpt
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
         INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: Zumpt shows your events next to your tasks. It only reads them and never changes anything.
