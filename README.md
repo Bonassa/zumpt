@@ -4,6 +4,9 @@ A macOS app that puts your calendar and your to-do list in the same place, so ta
 Calendar events are read from the macOS Calendar through EventKit, read-only, so every account already set up there (Google, Exchange, iCloud) shows up with no extra setup.
 Tasks live in the app.
 
+Where the project is going and what is left lives in [docs/ROADMAP.md](docs/ROADMAP.md).
+Requirements for the upcoming work live in [docs/prds/](docs/prds/README.md).
+
 ## Requirements
 
 - macOS 26 or later.
