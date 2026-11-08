@@ -94,11 +94,11 @@ final class TaskModel {
 }
 
 extension TaskModel {
-    static func make(options: LaunchOptions) -> TaskModel {
+    static func make(options: LaunchOptions, calendar: Calendar) -> TaskModel {
         let model = TaskModel(container: container(for: options), now: options.now)
         #if DEBUG
             if let fixture = options.taskFixture {
-                model.seed(FixtureTasks.tasks(named: fixture, now: options.now()))
+                model.seed(FixtureTasks.tasks(named: fixture, now: options.now(), calendar: calendar))
             }
         #endif
         return model

@@ -1,0 +1,33 @@
+import AppKit
+import SwiftUI
+
+extension Color {
+    static let task = Color(
+        light: NSColor(srgbRed: 45 / 255, green: 100 / 255, blue: 216 / 255, alpha: 1),
+        dark: NSColor(srgbRed: 102 / 255, green: 148 / 255, blue: 240 / 255, alpha: 1)
+    )
+    static let taskBlockFill = Color(
+        light: .white,
+        dark: NSColor(white: 0.17, alpha: 1)
+    )
+    static let backlogBackground = Color(
+        light: NSColor(srgbRed: 0.98, green: 0.98, blue: 0.988, alpha: 1),
+        dark: NSColor(white: 0.14, alpha: 1)
+    )
+    static let backlogCard = Color(
+        light: .white,
+        dark: NSColor(white: 0.19, alpha: 1)
+    )
+    static let backlogCardBorder = Color(
+        light: NSColor(white: 0, alpha: 0.1),
+        dark: NSColor(white: 1, alpha: 0.08)
+    )
+
+    init(light: NSColor, dark: NSColor) {
+        self.init(
+            nsColor: NSColor(name: nil) { appearance in
+                appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light
+            }
+        )
+    }
+}

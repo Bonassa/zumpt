@@ -11,7 +11,7 @@ struct DayLayoutTests {
             to: try date(2026, 11, 2, hour: 12, minute: 30, in: calendar)
         )
 
-        let layout = DayLayout.timedEvents([event], on: try date(2026, 11, 2, in: calendar), calendar: calendar)
+        let layout = timedItems([event], on: try date(2026, 11, 2, in: calendar), calendar: calendar)
 
         #expect(layout.map(\.startMinute) == [660])
         #expect(layout.map(\.endMinute) == [750])
@@ -45,9 +45,9 @@ struct DayLayoutTests {
             ),
         ]
 
-        let layout = DayLayout.timedEvents(events, on: try date(2026, 11, 2, in: calendar), calendar: calendar)
+        let layout = timedItems(events, on: try date(2026, 11, 2, in: calendar), calendar: calendar)
 
-        #expect(layout.map(\.event.title) == ["Today"])
+        #expect(layout.map(\.item.title) == ["Today"])
     }
 
     @Test func splitsOverlappingEventsIntoColumns() throws {
@@ -65,9 +65,9 @@ struct DayLayoutTests {
             ),
         ]
 
-        let layout = DayLayout.timedEvents(events, on: try date(2026, 11, 4, in: calendar), calendar: calendar)
+        let layout = timedItems(events, on: try date(2026, 11, 4, in: calendar), calendar: calendar)
 
-        #expect(layout.map(\.event.title) == ["Forum", "Design review"])
+        #expect(layout.map(\.item.title) == ["Forum", "Design review"])
         #expect(layout.map(\.column) == [0, 1])
         #expect(layout.map(\.columnSpan) == [1, 1])
         #expect(layout.map(\.columnCount) == [2, 2])
@@ -98,9 +98,9 @@ struct DayLayoutTests {
             ),
         ]
 
-        let layout = DayLayout.timedEvents(events, on: try date(2026, 11, 2, in: calendar), calendar: calendar)
+        let layout = timedItems(events, on: try date(2026, 11, 2, in: calendar), calendar: calendar)
 
-        #expect(layout.map(\.event.title) == ["Workshop", "Planning", "Daily", "Review"])
+        #expect(layout.map(\.item.title) == ["Workshop", "Planning", "Daily", "Review"])
         #expect(layout.map(\.column) == [0, 1, 2, 1])
         #expect(layout.map(\.columnSpan) == [1, 1, 1, 2])
         #expect(layout.map(\.columnCount) == [3, 3, 3, 3])
@@ -121,7 +121,7 @@ struct DayLayoutTests {
             ),
         ]
 
-        let layout = DayLayout.timedEvents(events, on: try date(2026, 11, 3, in: calendar), calendar: calendar)
+        let layout = timedItems(events, on: try date(2026, 11, 3, in: calendar), calendar: calendar)
 
         #expect(layout.map(\.column) == [0, 0])
         #expect(layout.map(\.columnCount) == [1, 1])
@@ -152,9 +152,9 @@ struct DayLayoutTests {
             ),
         ]
 
-        let layout = DayLayout.timedEvents(events, on: try date(2026, 11, 5, in: calendar), calendar: calendar)
+        let layout = timedItems(events, on: try date(2026, 11, 5, in: calendar), calendar: calendar)
 
-        #expect(layout.map(\.event.title) == ["A", "B", "C", "D"])
+        #expect(layout.map(\.item.title) == ["A", "B", "C", "D"])
         #expect(layout.map(\.column) == [0, 1, 0, 0])
         #expect(layout.map(\.columnSpan) == [1, 1, 1, 1])
         #expect(layout.map(\.columnCount) == [2, 2, 2, 1])
@@ -168,8 +168,8 @@ struct DayLayoutTests {
             to: try date(2026, 11, 7, hour: 2, in: calendar)
         )
 
-        let friday = DayLayout.timedEvents([event], on: try date(2026, 11, 6, in: calendar), calendar: calendar)
-        let saturday = DayLayout.timedEvents([event], on: try date(2026, 11, 7, in: calendar), calendar: calendar)
+        let friday = timedItems([event], on: try date(2026, 11, 6, in: calendar), calendar: calendar)
+        let saturday = timedItems([event], on: try date(2026, 11, 7, in: calendar), calendar: calendar)
 
         #expect(friday.map(\.startMinute) == [1320])
         #expect(friday.map(\.endMinute) == [1440])
@@ -185,7 +185,7 @@ struct DayLayoutTests {
             makeEvent("Check-in", from: start.addingTimeInterval(20 * 60), to: start.addingTimeInterval(25 * 60)),
         ]
 
-        let layout = DayLayout.timedEvents(events, on: start, calendar: calendar)
+        let layout = timedItems(events, on: start, calendar: calendar)
 
         #expect(layout.map(\.startMinute) == [570, 590])
         #expect(layout.map(\.endMinute) == [585, 605])
@@ -219,5 +219,81 @@ struct DayLayoutTests {
         let allDay = DayLayout.allDayEvents([meeting], on: try date(2026, 11, 2, in: calendar), calendar: calendar)
 
         #expect(allDay.isEmpty)
+    }
+
+    @Test func placesAScheduledTaskForThirtyMinutes() throws {
+        let calendar = try makeCalendar()
+        let task = makeTask("Renovar CNH", scheduledAt: try date(2026, 11, 4, hour: 14, in: calendar))
+
+        let layout = timedItems([], tasks: [task], on: try date(2026, 11, 4, in: calendar), calendar: calendar)
+
+        #expect(layout.map(\.item) == [.task(task)])
+        #expect(layout.map(\.startMinute) == [840])
+        #expect(layout.map(\.endMinute) == [870])
+        #expect(layout.map(\.columnCount) == [1])
+    }
+
+    @Test func putsATaskNextToAMeetingAtTheSameTime() throws {
+        let calendar = try makeCalendar()
+        let start = try date(2026, 11, 2, hour: 15, in: calendar)
+        let meeting = makeEvent("Acompanhamento squad", from: start, to: start.addingTimeInterval(30 * 60))
+        let task = makeTask("Revisar contrato", scheduledAt: start)
+
+        let layout = timedItems([meeting], tasks: [task], on: start, calendar: calendar)
+
+        #expect(Set(layout.map(\.item)) == [.event(meeting), .task(task)])
+        #expect(Set(layout.map(\.column)) == [0, 1])
+        #expect(layout.map(\.columnSpan) == [1, 1])
+        #expect(layout.map(\.columnCount) == [2, 2])
+    }
+
+    @Test func putsATaskBesideTheMeetingItOverlaps() throws {
+        let calendar = try makeCalendar()
+        let meeting = makeEvent(
+            "Planejamento",
+            from: try date(2026, 11, 2, hour: 11, in: calendar),
+            to: try date(2026, 11, 2, hour: 12, in: calendar)
+        )
+        let task = makeTask("Pagar boleto", scheduledAt: try date(2026, 11, 2, hour: 11, minute: 45, in: calendar))
+
+        let layout = timedItems([meeting], tasks: [task], on: try date(2026, 11, 2, in: calendar), calendar: calendar)
+
+        #expect(layout.map(\.item) == [.event(meeting), .task(task)])
+        #expect(layout.map(\.column) == [0, 1])
+        #expect(layout.map(\.columnCount) == [2, 2])
+    }
+
+    @Test func leavesOutTasksFromOtherDaysAndUnscheduledTasks() throws {
+        let calendar = try makeCalendar()
+        let tasks = [
+            makeTask("Yesterday", scheduledAt: try date(2026, 11, 1, hour: 10, in: calendar)),
+            makeTask("Backlog", scheduledAt: nil),
+            makeTask("Today", scheduledAt: try date(2026, 11, 2, hour: 10, in: calendar)),
+        ]
+
+        let layout = timedItems([], tasks: tasks, on: try date(2026, 11, 2, in: calendar), calendar: calendar)
+
+        #expect(layout.map(\.item.title) == ["Today"])
+    }
+
+    @Test func keepsATaskAtTheEndOfTheDayInsideTheDay() throws {
+        let calendar = try makeCalendar()
+        let task = makeTask("Planejar amanhã", scheduledAt: try date(2026, 11, 2, hour: 23, minute: 30, in: calendar))
+
+        let monday = timedItems([], tasks: [task], on: try date(2026, 11, 2, in: calendar), calendar: calendar)
+        let tuesday = timedItems([], tasks: [task], on: try date(2026, 11, 3, in: calendar), calendar: calendar)
+
+        #expect(monday.map(\.startMinute) == [1410])
+        #expect(monday.map(\.endMinute) == [1440])
+        #expect(tuesday.isEmpty)
+    }
+
+    private func timedItems(
+        _ events: [CalendarEvent],
+        tasks: [TaskItem] = [],
+        on day: Date,
+        calendar: Calendar
+    ) -> [PositionedItem] {
+        DayLayout.timedItems(events: events, tasks: tasks, on: day, calendar: calendar)
     }
 }

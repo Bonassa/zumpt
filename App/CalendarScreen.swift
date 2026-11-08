@@ -15,6 +15,7 @@ struct CalendarScreen: View {
                     WeekGrid(
                         week: model.week,
                         events: model.visibleEvents,
+                        tasks: taskModel.tasks,
                         colors: model.calendarColors,
                         calendar: model.calendar,
                         now: model.now()

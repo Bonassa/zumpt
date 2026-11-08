@@ -2,7 +2,7 @@ import SwiftUI
 import ZumptKit
 
 struct DayColumn: View {
-    let events: [PositionedEvent]
+    let items: [PositionedItem]
     let colors: [String: CalendarColor]
     let isWeekend: Bool
     let nowMinute: Int?
@@ -11,17 +11,24 @@ struct DayColumn: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .topLeading) {
-                ForEach(events, id: \.event.id) { positioned in
+                ForEach(items, id: \.item.id) { positioned in
                     let frame = Self.frame(of: positioned, columnWidth: proxy.size.width)
-                    EventBlock(
-                        event: positioned.event,
-                        color: colors[positioned.event.calendarID] ?? .unknown,
-                        height: frame.height,
-                        selectedEventID: $selectedEventID
-                    )
-                    .frame(width: frame.width, height: frame.height)
-                    .eventDetailsPopover(for: positioned.event, selectedEventID: $selectedEventID)
-                    .offset(x: frame.minX, y: frame.minY)
+                    switch positioned.item {
+                    case .event(let event):
+                        EventBlock(
+                            event: event,
+                            color: colors[event.calendarID] ?? .unknown,
+                            height: frame.height,
+                            selectedEventID: $selectedEventID
+                        )
+                        .frame(width: frame.width, height: frame.height)
+                        .eventDetailsPopover(for: event, selectedEventID: $selectedEventID)
+                        .offset(x: frame.minX, y: frame.minY)
+                    case .task(let task):
+                        TaskBlock(task: task)
+                            .frame(width: frame.width, height: frame.height)
+                            .offset(x: frame.minX, y: frame.minY)
+                    }
                 }
                 if let nowMinute {
                     NowLine()
@@ -36,7 +43,7 @@ struct DayColumn: View {
         }
     }
 
-    private static func frame(of positioned: PositionedEvent, columnWidth: CGFloat) -> CGRect {
+    private static func frame(of positioned: PositionedItem, columnWidth: CGFloat) -> CGRect {
         let inset: CGFloat = 3
         let gap: CGFloat = 2
         let columnCount = CGFloat(positioned.columnCount)

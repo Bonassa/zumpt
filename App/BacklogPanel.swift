@@ -57,7 +57,7 @@ struct BacklogPanel: View {
             .background(Color.backlogCard, in: .rect(cornerRadius: 8))
             .overlay {
                 RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                    .strokeBorder(Color.task, lineWidth: 1.5)
             }
             .onSubmit(commitNewTask)
             .onExitCommand(perform: endNewTask)

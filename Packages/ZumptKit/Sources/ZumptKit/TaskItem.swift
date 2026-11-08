@@ -1,14 +1,22 @@
 import Foundation
 
 public struct TaskItem: Identifiable, Hashable, Sendable {
+    public static let durationInMinutes = 30
+
     public let id: UUID
     public var title: String
     public var createdAt: Date
+    public var scheduledStart: Date?
 
-    public init(id: UUID, title: String, createdAt: Date) {
+    public init(id: UUID, title: String, createdAt: Date, scheduledStart: Date? = nil) {
         self.id = id
         self.title = title
         self.createdAt = createdAt
+        self.scheduledStart = scheduledStart
+    }
+
+    public var scheduledEnd: Date? {
+        scheduledStart?.addingTimeInterval(TimeInterval(Self.durationInMinutes * 60))
     }
 }
 
@@ -26,6 +34,8 @@ public enum TaskTitle {
 
 public enum Backlog {
     public static func tasks(_ tasks: [TaskItem]) -> [TaskItem] {
-        tasks.sorted { ($0.createdAt, $0.id.uuidString) > ($1.createdAt, $1.id.uuidString) }
+        tasks
+            .filter { $0.scheduledStart == nil }
+            .sorted { ($0.createdAt, $0.id.uuidString) > ($1.createdAt, $1.id.uuidString) }
     }
 }

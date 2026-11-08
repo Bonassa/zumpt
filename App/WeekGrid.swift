@@ -25,6 +25,7 @@ enum WeekGridMetrics {
 struct WeekGrid: View {
     let week: Week
     let events: [CalendarEvent]
+    let tasks: [TaskItem]
     let colors: [String: CalendarColor]
     let calendar: Calendar
     let now: Date
@@ -53,7 +54,7 @@ struct WeekGrid: View {
                     WeightedColumns {
                         ForEach(week.days, id: \.self) { day in
                             DayColumn(
-                                events: DayLayout.timedEvents(events, on: day, calendar: calendar),
+                                items: DayLayout.timedItems(events: events, tasks: tasks, on: day, calendar: calendar),
                                 colors: colors,
                                 isWeekend: calendar.isDateInWeekend(day),
                                 nowMinute: calendar.isDate(day, inSameDayAs: now) ? nowMinute : nil,
