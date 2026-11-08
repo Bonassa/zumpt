@@ -15,7 +15,8 @@ class ZumptTestCase: XCTestCase {
         locale: String = "pt_BR",
         tasksStore: String = "memory",
         taskFixture: String? = nil,
-        now: String = fixedNow
+        now: String = fixedNow,
+        isDark: Bool = false
     ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -27,6 +28,9 @@ class ZumptTestCase: XCTestCase {
         ]
         if let taskFixture {
             app.launchArguments += ["--task-fixture", taskFixture]
+        }
+        if isDark {
+            app.launchArguments += ["--appearance", "dark"]
         }
         app.launch()
         addTeardownBlock { @MainActor in app.terminate() }

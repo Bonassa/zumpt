@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import ZumptKit
 
 struct LaunchOptions {
@@ -11,6 +12,7 @@ struct LaunchOptions {
     let calendarFixtureAccess: CalendarAccess?
     let tasksStore: TasksStore?
     let taskFixture: String?
+    let colorScheme: ColorScheme?
 
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         #if DEBUG
@@ -21,11 +23,13 @@ struct LaunchOptions {
                 Self.value(after: "--tasks-store", in: arguments).map(Self.tasksStore(named:))
                 ?? (calendarFixtureAccess == nil ? nil : .memory)
             taskFixture = Self.value(after: "--task-fixture", in: arguments)
+            colorScheme = Self.value(after: "--appearance", in: arguments).flatMap(Self.colorScheme(named:))
         #else
             now = { Date() }
             calendarFixtureAccess = nil
             tasksStore = nil
             taskFixture = nil
+            colorScheme = nil
         #endif
     }
 
@@ -49,6 +53,14 @@ struct LaunchOptions {
         case "granted": .granted
         case "denied": .denied
         case "notDetermined": .notDetermined
+        default: nil
+        }
+    }
+
+    private static func colorScheme(named name: String) -> ColorScheme? {
+        switch name {
+        case "light": .light
+        case "dark": .dark
         default: nil
         }
     }

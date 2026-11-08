@@ -11,6 +11,7 @@ struct ZumptApp: App {
         Window(Text(verbatim: "Zumpt"), id: "main") {
             RootView(calendarModel: calendarModel, taskModel: taskModel)
                 .environment(\.locale, .app)
+                .preferredColorScheme(Self.options.colorScheme)
         }
         .defaultSize(width: 1440, height: 900)
         .commands {

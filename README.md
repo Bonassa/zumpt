@@ -47,7 +47,8 @@ They launch the app with options that only exist in Debug builds, so events, tas
 | `--calendar-fixture granted\|denied\|notDetermined` | Shows fictional calendars and events instead of the Calendar app, with that access state |
 | `--now <ISO 8601 date>` | Starts the clock at that moment, and it keeps ticking from there |
 | `--tasks-store memory\|<file>` | Keeps tasks in memory, or in a file inside the app's temporary folder; with `--calendar-fixture` it defaults to `memory` |
-| `--task-fixture <names>` | Adds fictional tasks at launch: `backlog`, `week`, or both as `backlog,week` |
+| `--task-fixture <names>` | Adds fictional tasks at launch: `backlog`, `week`, `overdue`, or several as `backlog,week` |
+| `--appearance light\|dark` | Forces the light or dark appearance, whatever the system uses |
 
 Each run attaches a screenshot of the window to the result bundle in `.build/DerivedData/Logs/Test/`.
 
