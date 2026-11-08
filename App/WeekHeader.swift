@@ -7,9 +7,11 @@ struct WeekHeader: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
+        let title = title
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text(title)
                 .tracking(-0.48)
+                .accessibilityLabel(Text(verbatim: String(title.characters)))
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("week-header-title")
             Text("Week \(week.number)")

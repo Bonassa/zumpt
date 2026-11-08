@@ -50,11 +50,32 @@ class ZumptTestCase: XCTestCase {
     }
 
     @MainActor
-    func assertWeekHeader(in app: XCUIApplication, title: String, number: String) {
+    func waitForText(
+        _ expected: String,
+        of element: XCUIElement,
+        timeout: TimeInterval = 3,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        while displayedText(of: element) != expected, Date.now < deadline {
+            RunLoop.current.run(until: Date.now.addingTimeInterval(0.1))
+        }
+        XCTAssertEqual(displayedText(of: element), expected, file: file, line: line)
+    }
+
+    @MainActor
+    func assertWeekHeader(
+        in app: XCUIApplication,
+        title: String,
+        number: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         let titleElement = element("week-header-title", in: app)
-        XCTAssertTrue(titleElement.waitForExistence(timeout: 5))
-        XCTAssertEqual(displayedText(of: titleElement), title)
-        XCTAssertEqual(displayedText(of: element("week-header-number", in: app)), number)
+        XCTAssertTrue(titleElement.waitForExistence(timeout: 5), file: file, line: line)
+        waitForText(title, of: titleElement, file: file, line: line)
+        waitForText(number, of: element("week-header-number", in: app), file: file, line: line)
     }
 
     @MainActor
