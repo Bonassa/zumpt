@@ -5,7 +5,7 @@ The big picture and the order of the stages live in [ROADMAP.md](../ROADMAP.md).
 
 ## PRDs
 
-- [001](001-tasks-in-the-week.md): Tasks in the week · Stage 3 · Approved
+- [001](001-tasks-in-the-week.md): Tasks in the week · Stage 3 · Done
 
 ## Rules for every PRD
 

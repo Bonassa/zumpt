@@ -31,6 +31,7 @@ Every feature is judged by one question: is Zumpt at least as good as the Calend
 | 2. Week view | Calendar access flow, week grid with all-day row, overlapping events in columns, now indicator, week navigation, sidebar with per-calendar visibility |
 | 2. Clean calendar | Declined and canceled meetings hidden, copies of the same meeting merged across and within calendars |
 | 2. Meeting details | Popover with time, repeat rule, join button for video calls, location, calendar, response, guests and notes |
+| 3. Tasks in the week | Backlog next to the week with quick add on ⌘N, tasks dragged into the week and back, completing, renaming and deleting with undo, overdue tasks returning to the top of the backlog, as described in [PRD-001](prds/001-tasks-in-the-week.md) |
 
 ## Next
 
@@ -38,7 +39,6 @@ Stages are ordered by how much they help Zumpt replace the calendar used all day
 
 | Stage | Scope | PRD |
 | --- | --- | --- |
-| 3. Tasks in the week | Create, complete, rename and delete tasks, backlog of unscheduled tasks, drag a task into the week and back, overdue tasks return to the backlog | [PRD-001](prds/001-tasks-in-the-week.md) |
 | 4. Always present | Menu bar item with the next meeting and today's tasks, launch at login, global shortcut to add a task, notifications for scheduled tasks | Not written |
 | 5. Navigation | Mini month in the sidebar, Day and Month views, Events, Tasks and Completed filters, search | Not written |
 | 6. Organization | Scopes (Personal and Work), projects, subtasks, due dates, recurring tasks | Not written |
