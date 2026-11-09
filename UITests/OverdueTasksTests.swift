@@ -28,6 +28,31 @@ final class OverdueTasksTests: ZumptTestCase {
     }
 
     @MainActor
+    func testReopeningADoneTaskFromAnEarlierDayReturnsItToTheBacklog() {
+        let app = launchApp(taskFixture: "week")
+        XCTAssertTrue(element("complete-Pagar fatura do cartão", in: app).waitForExistence(timeout: 5))
+
+        click("complete-Pagar fatura do cartão", in: app)
+
+        let overdue = element("backlog-task-Pagar fatura do cartão", in: app)
+        XCTAssertTrue(overdue.waitForExistence(timeout: 3))
+        XCTAssertFalse(element("task-Pagar fatura do cartão", in: app).exists, "It left the week")
+        XCTAssertEqual(
+            displayedText(of: element("backlog-task-due-Pagar fatura do cartão", in: app)), "Venceu seg., 2 de nov.")
+        attachWindowScreenshot(of: app)
+
+        app.typeKey("z", modifierFlags: .command)
+
+        assertTask("Pagar fatura do cartão", isOn: "2026-11-02", at: "08:30 – 09:00", in: app)
+        XCTAssertTrue(overdue.waitForNonExistence(timeout: 2))
+
+        app.typeKey("z", modifierFlags: [.command, .shift])
+
+        XCTAssertTrue(overdue.waitForExistence(timeout: 3))
+        XCTAssertTrue(element("task-Pagar fatura do cartão", in: app).waitForNonExistence(timeout: 2))
+    }
+
+    @MainActor
     func testSchedulingAnOverdueTaskAgainClearsTheOverdueMark() {
         let app = launchApp(taskFixture: "overdue")
         XCTAssertTrue(element("backlog-task-Enviar NF de outubro", in: app).waitForExistence(timeout: 5))

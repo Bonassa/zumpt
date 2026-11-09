@@ -107,7 +107,7 @@ final class TaskModel {
     }
 
     private func write(_ task: TaskItem?, id: UUID) {
-        apply(task, id: id)
+        apply(task.map { OverdueTasks.reconciled($0, now: now(), calendar: calendar) }, id: id)
         save()
     }
 

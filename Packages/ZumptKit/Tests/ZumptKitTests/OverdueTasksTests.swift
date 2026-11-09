@@ -64,6 +64,36 @@ struct OverdueTasksTests {
         #expect(returned.isEmpty)
     }
 
+    @Test func reconcilesATaskReopenedAfterItsDayEnded() throws {
+        let calendar = try makeCalendar()
+        let start = try date(2026, 11, 2, hour: 8, minute: 30, in: calendar)
+        let reopened = makeTask("Pagar fatura do cartão", scheduledAt: start)
+
+        let reconciled = OverdueTasks.reconciled(
+            reopened, now: try date(2026, 11, 4, hour: 12, in: calendar), calendar: calendar)
+
+        #expect(reconciled.id == reopened.id)
+        #expect(reconciled.scheduledStart == nil)
+        #expect(reconciled.missedStart == start)
+        #expect(reconciled.isOverdue)
+    }
+
+    @Test func reconcilesOtherTasksToThemselves() throws {
+        let calendar = try makeCalendar()
+        let yesterday = try date(2026, 11, 3, hour: 10, in: calendar)
+        let tasks = [
+            makeTask("Done yesterday", scheduledAt: yesterday, completedAt: yesterday),
+            makeTask("Backlog"),
+            makeTask("Earlier today", scheduledAt: try date(2026, 11, 4, hour: 9, in: calendar)),
+            makeTask("Tomorrow", scheduledAt: try date(2026, 11, 5, hour: 10, in: calendar)),
+        ]
+        let now = try date(2026, 11, 4, hour: 12, in: calendar)
+
+        let reconciled = tasks.map { OverdueTasks.reconciled($0, now: now, calendar: calendar) }
+
+        #expect(reconciled == tasks)
+    }
+
     @Test func usesTheDayOfTheCurrentTimeZone() throws {
         let saoPaulo = try makeCalendar(timeZone: "America/Sao_Paulo")
         let task = makeTask("Ligar para o banco", scheduledAt: try date(2026, 11, 4, hour: 0, minute: 30, in: saoPaulo))

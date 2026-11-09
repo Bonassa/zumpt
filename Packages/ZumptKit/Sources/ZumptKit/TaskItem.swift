@@ -74,14 +74,20 @@ public enum Backlog {
 public enum OverdueTasks {
     public static func returned(from tasks: [TaskItem], now: Date, calendar: Calendar) -> [TaskItem] {
         let startOfToday = calendar.startOfDay(for: now)
-        return tasks.compactMap { task in
-            guard let start = task.scheduledStart, !task.isDone, start < startOfToday else {
-                return nil
-            }
-            var overdue = task
-            overdue.scheduledStart = nil
-            overdue.missedStart = start
-            return overdue
+        return tasks.compactMap { returned($0, startOfToday: startOfToday) }
+    }
+
+    public static func reconciled(_ task: TaskItem, now: Date, calendar: Calendar) -> TaskItem {
+        returned(task, startOfToday: calendar.startOfDay(for: now)) ?? task
+    }
+
+    private static func returned(_ task: TaskItem, startOfToday: Date) -> TaskItem? {
+        guard let start = task.scheduledStart, !task.isDone, start < startOfToday else {
+            return nil
         }
+        var overdue = task
+        overdue.scheduledStart = nil
+        overdue.missedStart = start
+        return overdue
     }
 }
