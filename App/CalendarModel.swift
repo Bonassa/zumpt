@@ -128,12 +128,7 @@ final class CalendarModel {
 extension CalendarModel {
     static func make(options: LaunchOptions) -> CalendarModel {
         let calendar = Calendar.autoupdatingCurrent
-        let now: () -> Date
-        if let fixedNow = options.fixedNow {
-            now = { fixedNow }
-        } else {
-            now = { Date() }
-        }
+        let now = options.now
 
         #if DEBUG
             if let fixtureAccess = options.calendarFixtureAccess {

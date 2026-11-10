@@ -26,6 +26,23 @@ func dayNumbers(of week: Week, in calendar: Calendar) -> [Int] {
     week.days.map { calendar.component(.day, from: $0) }
 }
 
+func makeTask(
+    _ title: String,
+    createdAt: Date = .distantPast,
+    scheduledAt: Date? = nil,
+    completedAt: Date? = nil,
+    missedAt: Date? = nil
+) -> TaskItem {
+    TaskItem(
+        id: UUID(),
+        title: title,
+        createdAt: createdAt,
+        scheduledStart: scheduledAt,
+        completedAt: completedAt,
+        missedStart: missedAt
+    )
+}
+
 func makeEvent(
     _ title: String,
     from start: Date,

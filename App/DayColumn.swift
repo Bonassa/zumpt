@@ -2,26 +2,48 @@ import SwiftUI
 import ZumptKit
 
 struct DayColumn: View {
-    let events: [PositionedEvent]
+    let day: Date
+    let items: [PositionedItem]
     let colors: [String: CalendarColor]
     let isWeekend: Bool
     let nowMinute: Int?
+    let calendar: Calendar
     @Binding var selectedEventID: String?
+
+    @State private var dropMinute: Int?
+    @Environment(TaskModel.self) private var taskModel
+    @Environment(TaskSelection.self) private var selection
+    @Environment(\.undoManager) private var undoManager
 
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .topLeading) {
-                ForEach(events, id: \.event.id) { positioned in
+                ForEach(items, id: \.item.id) { positioned in
                     let frame = Self.frame(of: positioned, columnWidth: proxy.size.width)
-                    EventBlock(
-                        event: positioned.event,
-                        color: colors[positioned.event.calendarID] ?? .unknown,
-                        height: frame.height,
-                        selectedEventID: $selectedEventID
-                    )
-                    .frame(width: frame.width, height: frame.height)
-                    .eventDetailsPopover(for: positioned.event, selectedEventID: $selectedEventID)
-                    .offset(x: frame.minX, y: frame.minY)
+                    switch positioned.item {
+                    case .event(let event):
+                        EventBlock(
+                            event: event,
+                            color: colors[event.calendarID] ?? .unknown,
+                            height: frame.height,
+                            selectedEventID: $selectedEventID
+                        )
+                        .frame(width: frame.width, height: frame.height)
+                        .eventDetailsPopover(for: event, selectedEventID: $selectedEventID)
+                        .offset(x: frame.minX, y: frame.minY)
+                    case .task(let task):
+                        TaskBlock(task: task)
+                            .frame(width: frame.width, height: frame.height)
+                            .offset(x: frame.minX, y: frame.minY)
+                    }
+                }
+                if let dropMinute {
+                    TaskDropPreview(start: TaskDrop.start(atMinute: dropMinute, on: day, calendar: calendar))
+                        .frame(
+                            width: max(proxy.size.width - 6, 0),
+                            height: WeekGridMetrics.y(forMinute: TaskItem.durationInMinutes) - 2
+                        )
+                        .offset(x: 3, y: WeekGridMetrics.y(forMinute: dropMinute))
                 }
                 if let nowMinute {
                     NowLine()
@@ -33,10 +55,38 @@ struct DayColumn: View {
         .frame(height: WeekGridMetrics.dayHeight)
         .background {
             DayColumnBackground(isWeekend: isWeekend)
+                .contentShape(.rect)
+                .onTapGesture(perform: selection.clear)
         }
+        .dropDestination(for: TaskDragItem.self) { items, session in
+            dropMinute = nil
+            let start = TaskDrop.start(atMinute: Self.dropMinute(at: session.location), on: day, calendar: calendar)
+            for item in items {
+                taskModel.move(item.id, to: start, undoManager: undoManager)
+            }
+        }
+        .onDropSessionUpdated { session in
+            switch session.phase {
+            case .entering, .active:
+                dropMinute = session.localSession == nil ? nil : Self.dropMinute(at: session.location)
+            default:
+                dropMinute = nil
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("day-column-\(dayIdentifier)")
     }
 
-    private static func frame(of positioned: PositionedEvent, columnWidth: CGFloat) -> CGRect {
+    private var dayIdentifier: String {
+        let components = calendar.dateComponents([.year, .month, .day], from: day)
+        return String(format: "%04d-%02d-%02d", components.year ?? 0, components.month ?? 0, components.day ?? 0)
+    }
+
+    private static func dropMinute(at location: CGPoint) -> Int {
+        TaskDrop.startMinute(at: WeekGridMetrics.minute(forY: location.y))
+    }
+
+    private static func frame(of positioned: PositionedItem, columnWidth: CGFloat) -> CGRect {
         let inset: CGFloat = 3
         let gap: CGFloat = 2
         let columnCount = CGFloat(positioned.columnCount)
@@ -140,6 +190,29 @@ private struct EventBlock: View {
 
     private var timeRange: String {
         (event.start..<event.end).formatted(Date.IntervalFormatStyle(date: .omitted, time: .shortened, locale: locale))
+    }
+}
+
+private struct TaskDropPreview: View {
+    let start: Date
+
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        Text(TaskBlock.timeRange(from: start, locale: locale))
+            .font(.system(size: 11, weight: .semibold))
+            .monospacedDigit()
+            .lineLimit(1)
+            .foregroundStyle(Color.task)
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .background(Color.task.opacity(0.12), in: .rect(cornerRadius: 6))
+            .overlay {
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(Color.task, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 }
 

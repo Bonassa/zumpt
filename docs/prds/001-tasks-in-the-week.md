@@ -1,6 +1,6 @@
 # PRD-001: Tasks in the week
 
-Status: Approved · Stage 3 · Updated 2026-11-08
+Status: Done · Stage 3 · Updated 2026-11-09
 
 ## 1. Problem
 

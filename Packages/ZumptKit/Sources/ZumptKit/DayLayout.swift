@@ -1,7 +1,26 @@
 import Foundation
 
-public struct PositionedEvent: Hashable, Sendable {
-    public let event: CalendarEvent
+public enum TimedItem: Hashable, Sendable {
+    case event(CalendarEvent)
+    case task(TaskItem)
+
+    public var id: String {
+        switch self {
+        case .event(let event): "event-\(event.id)"
+        case .task(let task): "task-\(task.id.uuidString)"
+        }
+    }
+
+    public var title: String {
+        switch self {
+        case .event(let event): event.title
+        case .task(let task): task.title
+        }
+    }
+}
+
+public struct PositionedItem: Hashable, Sendable {
+    public let item: TimedItem
     public let startMinute: Int
     public let endMinute: Int
     public let column: Int
@@ -21,18 +40,30 @@ public enum DayLayout {
             .sorted { ($0.start, $0.title, $0.id) < ($1.start, $1.title, $1.id) }
     }
 
-    public static func timedEvents(_ events: [CalendarEvent], on day: Date, calendar: Calendar) -> [PositionedEvent] {
+    public static func timedItems(
+        events: [CalendarEvent],
+        tasks: [TaskItem],
+        on day: Date,
+        calendar: Calendar
+    ) -> [PositionedItem] {
         let interval = dayInterval(containing: day, calendar: calendar)
-        let spans =
+        let eventSpans =
             events
             .filter { !$0.isAllDay && overlaps($0, interval) }
-            .map { span(of: $0, within: interval, calendar: calendar) }
-            .sorted(by: isPlacedBefore)
-        return clusters(of: spans).flatMap(assignColumns)
+            .map { span(of: .event($0), from: $0.start, to: $0.end, within: interval, calendar: calendar) }
+        let taskSpans = tasks.compactMap { task -> Span? in
+            guard let start = task.scheduledStart, let end = task.scheduledEnd,
+                overlaps(start: start, end: end, interval)
+            else {
+                return nil
+            }
+            return span(of: .task(task), from: start, to: end, within: interval, calendar: calendar)
+        }
+        return clusters(of: (eventSpans + taskSpans).sorted(by: isPlacedBefore)).flatMap(assignColumns)
     }
 
     private struct Span {
-        let event: CalendarEvent
+        let item: TimedItem
         let startMinute: Int
         let endMinute: Int
     }
@@ -45,14 +76,24 @@ public enum DayLayout {
     }
 
     private static func overlaps(_ event: CalendarEvent, _ interval: DateInterval) -> Bool {
-        event.start < interval.end && (event.end > interval.start || event.start >= interval.start)
+        overlaps(start: event.start, end: event.end, interval)
     }
 
-    private static func span(of event: CalendarEvent, within day: DateInterval, calendar: Calendar) -> Span {
-        let startMinute = event.start <= day.start ? 0 : minutesSinceStartOfDay(event.start, calendar: calendar)
-        let endMinute = event.end >= day.end ? minutesPerDay : minutesSinceStartOfDay(event.end, calendar: calendar)
+    private static func overlaps(start: Date, end: Date, _ interval: DateInterval) -> Bool {
+        start < interval.end && (end > interval.start || start >= interval.start)
+    }
+
+    private static func span(
+        of item: TimedItem,
+        from start: Date,
+        to end: Date,
+        within day: DateInterval,
+        calendar: Calendar
+    ) -> Span {
+        let startMinute = start <= day.start ? 0 : minutesSinceStartOfDay(start, calendar: calendar)
+        let endMinute = end >= day.end ? minutesPerDay : minutesSinceStartOfDay(end, calendar: calendar)
         let paddedEndMinute = min(minutesPerDay, max(endMinute, startMinute + minimumDurationInMinutes))
-        return Span(event: event, startMinute: startMinute, endMinute: paddedEndMinute)
+        return Span(item: item, startMinute: startMinute, endMinute: paddedEndMinute)
     }
 
     private static func minutesSinceStartOfDay(_ date: Date, calendar: Calendar) -> Int {
@@ -67,7 +108,7 @@ public enum DayLayout {
         if lhs.endMinute != rhs.endMinute {
             return lhs.endMinute > rhs.endMinute
         }
-        return (lhs.event.title, lhs.event.id) < (rhs.event.title, rhs.event.id)
+        return (lhs.item.title, lhs.item.id) < (rhs.item.title, rhs.item.id)
     }
 
     private static func clusters(of spans: [Span]) -> [[Span]] {
@@ -84,7 +125,7 @@ public enum DayLayout {
         return clusters
     }
 
-    private static func assignColumns(_ cluster: [Span]) -> [PositionedEvent] {
+    private static func assignColumns(_ cluster: [Span]) -> [PositionedItem] {
         var columnEndMinutes: [Int] = []
         var columns: [Int] = []
         for span in cluster {
@@ -99,8 +140,8 @@ public enum DayLayout {
         let placed = Array(zip(cluster, columns))
         let columnCount = columnEndMinutes.count
         return placed.map { span, column in
-            PositionedEvent(
-                event: span.event,
+            PositionedItem(
+                item: span.item,
                 startMinute: span.startMinute,
                 endMinute: span.endMinute,
                 column: column,

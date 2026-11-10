@@ -71,6 +71,58 @@
         }
       }
     },
+    "%lld tasks" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld task"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tasks"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No tasks"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefa"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefas"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Nenhuma tarefa"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld yes" : {
       "localizations" : {
         "pt-BR" : {
@@ -131,12 +183,52 @@
         }
       }
     },
+    "Backlog" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backlog"
+          }
+        }
+      }
+    },
     "Calendar access is off" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "O acesso ao calendário está desligado"
+          }
+        }
+      }
+    },
+    "Complete" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluir"
+          }
+        }
+      }
+    },
+    "Complete %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluir %@"
+          }
+        }
+      }
+    },
+    "Complete Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluir tarefa"
           }
         }
       }
@@ -157,6 +249,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recusou"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir"
+          }
+        }
+      }
+    },
+    "Delete Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir tarefa"
+          }
+        }
+      }
+    },
+    "Due %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Venceu %@"
           }
         }
       }
@@ -281,6 +403,36 @@
         }
       }
     },
+    "Move Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover tarefa"
+          }
+        }
+      }
+    },
+    "New Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova tarefa"
+          }
+        }
+      }
+    },
+    "New task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova tarefa"
+          }
+        }
+      }
+    },
     "Next week" : {
       "localizations" : {
         "pt-BR" : {
@@ -331,12 +483,102 @@
         }
       }
     },
+    "Overdue" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atrasadas"
+          }
+        }
+      }
+    },
+    "Press ⌘N to add a task." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressione ⌘N para adicionar uma tarefa."
+          }
+        }
+      }
+    },
     "Previous week" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Semana anterior"
+          }
+        }
+      }
+    },
+    "Rename" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomear"
+          }
+        }
+      }
+    },
+    "Rename Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomear tarefa"
+          }
+        }
+      }
+    },
+    "Reopen" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reabrir"
+          }
+        }
+      }
+    },
+    "Reopen %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reabrir %@"
+          }
+        }
+      }
+    },
+    "Reopen Task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reabrir tarefa"
+          }
+        }
+      }
+    },
+    "Tasks without a time. Drag one into the week to schedule it." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarefas sem horário. Arraste uma para a semana para agendar."
+          }
+        }
+      }
+    },
+    "Title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título"
           }
         }
       }
