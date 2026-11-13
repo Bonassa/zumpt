@@ -34,9 +34,10 @@ struct WeekGrid: View {
     let calendar: Calendar
     let now: Date
 
-    @State private var scrollPosition = ScrollPosition(
-        y: WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
-    )
+    @State private var scrollPosition = ScrollPosition(y: Self.workdayStartY)
+    @State private var hasShownWorkdayStart = false
+
+    private static let workdayStartY = WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
     @State private var selectedEventID: String?
 
     var body: some View {
@@ -77,6 +78,15 @@ struct WeekGrid: View {
                 .padding(.bottom, WeekGridMetrics.bottomPadding)
             }
             .scrollPosition($scrollPosition)
+            .onScrollGeometryChange(for: Bool.self) { geometry in
+                geometry.containerSize.height > 0 && geometry.contentSize.height > geometry.containerSize.height
+            } action: { _, canScroll in
+                guard canScroll, !hasShownWorkdayStart else {
+                    return
+                }
+                hasShownWorkdayStart = true
+                scrollPosition.scrollTo(y: Self.workdayStartY)
+            }
             .scrollIndicators(.never)
         }
     }

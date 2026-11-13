@@ -4,32 +4,31 @@ import ZumptKit
 struct CalendarScreen: View {
     let model: CalendarModel
     let taskModel: TaskModel
+    @Bindable var workspace: Workspace
 
     @State private var selection = TaskSelection()
 
     var body: some View {
         NavigationSplitView {
-            CalendarSidebar(model: model)
+            AppSidebar(calendarModel: model, taskModel: taskModel, workspace: workspace)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } detail: {
-            HStack(spacing: 0) {
-                TimelineView(.everyMinute) { _ in
-                    WeekGrid(
-                        week: model.week,
-                        events: model.visibleEvents,
-                        tasks: taskModel.tasks,
-                        colors: model.calendarColors,
-                        calendar: model.calendar,
-                        now: model.now()
-                    )
-                }
-                .environment(model)
-                Rectangle().fill(Color.gridLine).frame(width: 1)
-                BacklogPanel(model: taskModel)
+            TimelineView(.everyMinute) { _ in
+                WeekGrid(
+                    week: model.week,
+                    events: model.visibleEvents,
+                    tasks: taskModel.tasks,
+                    colors: model.calendarColors,
+                    calendar: model.calendar,
+                    now: model.now()
+                )
             }
-            .environment(taskModel)
-            .environment(selection)
+            .environment(model)
             .background(Color(nsColor: .textBackgroundColor))
+            .inspector(isPresented: $workspace.isBacklogVisible) {
+                BacklogPanel(model: taskModel, workspace: workspace)
+                    .inspectorColumnWidth(BacklogPanel.width)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigation) {
                     WeekHeader(week: model.week)
@@ -37,9 +36,47 @@ struct CalendarScreen: View {
                 .sharedBackgroundVisibility(.hidden)
                 ToolbarSpacer(.flexible)
                 WeekNavigation(model: model)
+                ToolbarSpacer(.fixed)
+                ToolbarItem {
+                    BacklogToggle(isVisible: $workspace.isBacklogVisible)
+                }
             }
         }
+        .environment(taskModel)
+        .environment(selection)
+        .focusedSceneValue(\.newTask, workspace.beginNewTask)
+        .focusedSceneValue(\.backlogVisibility, $workspace.isBacklogVisible)
     }
+}
+
+private struct BacklogToggle: View {
+    @Binding var isVisible: Bool
+
+    var body: some View {
+        Button {
+            isVisible.toggle()
+        } label: {
+            Label(isVisible ? "Hide Backlog" : "Show Backlog", systemImage: "sidebar.trailing")
+        }
+        .help(isVisible ? Text("Hide Backlog") : Text("Show Backlog"))
+        .accessibilityIdentifier("backlog-toggle")
+    }
+}
+
+struct BacklogVisibilityCommand: View {
+    @FocusedBinding(\.backlogVisibility) private var isVisible
+
+    var body: some View {
+        Button(isVisible == true ? "Hide Backlog" : "Show Backlog") {
+            isVisible?.toggle()
+        }
+        .keyboardShortcut("b", modifiers: [.command, .option])
+        .disabled(isVisible == nil)
+    }
+}
+
+extension FocusedValues {
+    @Entry var backlogVisibility: Binding<Bool>?
 }
 
 private struct WeekNavigation: ToolbarContent {

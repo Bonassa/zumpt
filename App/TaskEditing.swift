@@ -87,6 +87,11 @@ private struct TaskKeyboardHandling: ViewModifier {
                     }
                 }
             }
+            .onExitCommand {
+                if selection.detailsID == task.id {
+                    selection.closeDetails()
+                }
+            }
             .onDeleteCommand {
                 guard selection.selectedID == task.id, selection.renamingID == nil else {
                     return
