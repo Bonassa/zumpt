@@ -32,6 +32,7 @@ Every feature is judged by one question: is Zumpt at least as good as the Calend
 | 2. Clean calendar | Declined and canceled meetings hidden, copies of the same meeting merged across and within calendars |
 | 2. Meeting details | Popover with time, repeat rule, join button for video calls, location, calendar, response, guests and notes |
 | 3. Tasks in the week | Backlog next to the week with quick add on ⌘N, tasks dragged into the week and back, completing, renaming and deleting with undo, overdue tasks returning to the top of the backlog, as described in [PRD-001](prds/001-tasks-in-the-week.md) |
+| 3. Layout and task details | Sidebar tabs for Calendar and Backlog, backlog filters (All Tasks and Overdue), backlog that can be hidden with ⌥⌘B, task details in a popover on click |
 
 ## Next
 
