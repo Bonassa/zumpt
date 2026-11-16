@@ -18,6 +18,9 @@ final class TaskSelection {
         if detailsID != id {
             closeDetails()
         }
+        if pendingRenameID != id {
+            pendingRenameID = nil
+        }
         selectedID = id
     }
 
