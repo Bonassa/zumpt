@@ -153,6 +153,16 @@
         }
       }
     },
+    "All Tasks" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas as tarefas"
+          }
+        }
+      }
+    },
     "all-day" : {
       "localizations" : {
         "pt-BR" : {
@@ -189,6 +199,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Backlog"
+          }
+        }
+      }
+    },
+    "Calendar" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendário"
           }
         }
       }
@@ -233,12 +253,32 @@
         }
       }
     },
+    "Completed %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluída em %@"
+          }
+        }
+      }
+    },
     "Connect your calendar" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Conecte seu calendário"
+          }
+        }
+      }
+    },
+    "Created %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criada em %@"
           }
         }
       }
@@ -383,6 +423,26 @@
         }
       }
     },
+    "Filters" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtros"
+          }
+        }
+      }
+    },
+    "Hide Backlog" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar backlog"
+          }
+        }
+      }
+    },
     "Join %@" : {
       "localizations" : {
         "pt-BR" : {
@@ -443,6 +503,26 @@
         }
       }
     },
+    "No overdue tasks." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma tarefa atrasada."
+          }
+        }
+      }
+    },
+    "No time · In the backlog" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem horário · No backlog"
+          }
+        }
+      }
+    },
     "No title" : {
       "localizations" : {
         "pt-BR" : {
@@ -489,6 +569,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Atrasadas"
+          }
+        }
+      }
+    },
+    "Overdue since %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atrasada desde %@"
           }
         }
       }
@@ -563,6 +653,26 @@
         }
       }
     },
+    "Show All Tasks" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas as tarefas"
+          }
+        }
+      }
+    },
+    "Show Backlog" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar backlog"
+          }
+        }
+      }
+    },
     "Tasks without a time. Drag one into the week to schedule it." : {
       "localizations" : {
         "pt-BR" : {
@@ -599,6 +709,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hoje"
+          }
+        }
+      }
+    },
+    "View" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visualização"
           }
         }
       }

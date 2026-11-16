@@ -91,3 +91,30 @@ struct BacklogTests {
         #expect(Backlog.tasks(tasks) == Backlog.tasks(tasks.reversed()))
     }
 }
+
+struct BacklogFilterTests {
+    @Test func showsTheWholeBacklogInItsOrder() throws {
+        let backlog = try sampleBacklog()
+
+        #expect(BacklogFilter.all.tasks(in: backlog).map(\.title) == ["Pagar IPVA", "Enviar NF", "Renovar CNH"])
+    }
+
+    @Test func showsOnlyOverdueTasksWithTheOldestOnTop() throws {
+        let backlog = try sampleBacklog()
+
+        #expect(BacklogFilter.overdue.tasks(in: backlog).map(\.title) == ["Pagar IPVA", "Enviar NF"])
+    }
+
+    @Test func showsNoOverdueTasksWhenNoneWereMissed() {
+        #expect(BacklogFilter.overdue.tasks(in: Backlog.tasks([makeTask("Renovar CNH")])).isEmpty)
+    }
+
+    private func sampleBacklog() throws -> [TaskItem] {
+        let calendar = try makeCalendar()
+        return Backlog.tasks([
+            makeTask("Renovar CNH", createdAt: try date(2026, 11, 4, hour: 9, in: calendar)),
+            makeTask("Enviar NF", missedAt: try date(2026, 11, 3, hour: 10, in: calendar)),
+            makeTask("Pagar IPVA", missedAt: try date(2026, 11, 2, hour: 16, in: calendar)),
+        ])
+    }
+}

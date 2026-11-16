@@ -8,11 +8,19 @@ struct LaunchOptions {
         case file(URL)
     }
 
+    enum Preferences: Equatable {
+        case standard
+        case memory
+        case suite(String)
+    }
+
     let now: () -> Date
     let calendarFixtureAccess: CalendarAccess?
     let tasksStore: TasksStore?
     let taskFixture: String?
     let colorScheme: ColorScheme?
+    let preferences: Preferences
+    let resetsPreferences: Bool
 
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         #if DEBUG
@@ -24,13 +32,23 @@ struct LaunchOptions {
                 ?? (calendarFixtureAccess == nil ? nil : .memory)
             taskFixture = Self.value(after: "--task-fixture", in: arguments)
             colorScheme = Self.value(after: "--appearance", in: arguments).flatMap(Self.colorScheme(named:))
+            preferences =
+                Self.value(after: "--preferences", in: arguments).map(Self.preferences(named:))
+                ?? (calendarFixtureAccess == nil ? .standard : .memory)
+            resetsPreferences = arguments.contains("--reset-preferences")
         #else
             now = { Date() }
             calendarFixtureAccess = nil
             tasksStore = nil
             taskFixture = nil
             colorScheme = nil
+            preferences = .standard
+            resetsPreferences = false
         #endif
+    }
+
+    private static func preferences(named name: String) -> Preferences {
+        name == "memory" ? .memory : .suite(name)
     }
 
     private static func clock(startingAt start: Date?) -> () -> Date {

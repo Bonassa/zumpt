@@ -146,7 +146,7 @@ struct EventDetailsView: View {
         return "\(day) · \(hours)"
     }
 
-    private static func capitalizingFirstLetter(of text: String, locale: Locale) -> String {
+    static func capitalizingFirstLetter(of text: String, locale: Locale) -> String {
         text.prefix(1).uppercased(with: locale) + text.dropFirst()
     }
 
@@ -170,7 +170,7 @@ struct EventDetailsView: View {
     }
 }
 
-private struct DetailRow<Content: View>: View {
+struct DetailRow<Content: View>: View {
     let systemImage: String
     var iconColor: Color = .secondary
     @ViewBuilder let content: Content

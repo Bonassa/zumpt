@@ -42,7 +42,7 @@ struct TaskBlock: View {
             if location.x <= Self.completionAreaWidth {
                 model.toggleCompletion(task.id, undoManager: undoManager)
             } else {
-                selection.select(task.id)
+                selection.selectAndShowDetails(task.id)
             }
         }
         .simultaneousGesture(
@@ -57,6 +57,7 @@ struct TaskBlock: View {
         }
         .draggable(TaskDragItem(id: task.id))
         .taskKeyboardHandling(for: task)
+        .taskDetailsPopover(for: task, arrowEdge: .trailing)
         .help(Text(verbatim: "\(task.title) · \(timeRange)"))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(verbatim: "\(task.title), \(timeRange)"))
