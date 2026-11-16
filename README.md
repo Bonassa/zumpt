@@ -20,9 +20,10 @@ Requirements for the upcoming work live in [docs/prds/](docs/prds/README.md).
 | --- | --- |
 | `make run` | Generates the Xcode project, builds the app and opens it |
 | `make build` | Generates the Xcode project and builds the app |
-| `make test` | Runs the unit tests, then the UI tests |
-| `make test-unit` | Runs the `ZumptKit` tests with `swift test`, without launching the app |
+| `make test` | Runs the `ZumptKit` tests with `swift test`, without launching the app (same as `make test-unit`) |
 | `make test-ui` | Runs the XCUITest suite against the app, with a fixed date and locale |
+| `make test-ui ONLY=DragTasksTests` | Runs only some UI tests: classes or `Class/testName`, separated by commas |
+| `make test-all` | Runs the unit tests, then the UI tests |
 | `make lint` | Checks formatting and style with `swift format` in strict mode |
 | `make format` | Formats the code in place |
 | `make generate` | Regenerates `Zumpt.xcodeproj` from `project.yml` |
@@ -30,6 +31,10 @@ Requirements for the upcoming work live in [docs/prds/](docs/prds/README.md).
 
 The Xcode project is generated and not committed.
 Change targets and build settings in `project.yml`, never in Xcode, and run any command above to regenerate it.
+
+UI tests take over the mouse and keyboard while they run, so the full suite is meant for CI.
+GitHub Actions runs lint, the unit tests and the UI tests on every pull request and on every push to `main`.
+Locally, run `make test`, plus `make test-ui ONLY=...` for the screens you changed.
 
 ## Layout
 
