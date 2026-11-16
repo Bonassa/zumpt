@@ -3,8 +3,8 @@ import ZumptKit
 
 struct BacklogPanel: View {
     let model: TaskModel
+    let workspace: Workspace
 
-    @State private var isAddingTask = false
     @State private var isDropTargeted = false
     @State private var draft = ""
     @FocusState private var isNewTaskFieldFocused: Bool
@@ -13,16 +13,24 @@ struct BacklogPanel: View {
     static let width: CGFloat = 280
 
     var body: some View {
-        let backlog = model.backlog
+        let filter = workspace.backlogFilter
+        let backlog = filter.tasks(in: model.backlog)
+        let isAddingTask = workspace.isAddingTask
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                BacklogHeader(count: backlog.count, addTask: beginNewTask)
+                BacklogHeader(count: backlog.count, addTask: workspace.beginNewTask)
                 Text("Tasks without a time. Drag one into the week to schedule it.")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 16)
+            if filter != .all {
+                FilterChip(filter: filter) {
+                    workspace.backlogFilter = .all
+                }
+                .padding(.horizontal, 16)
+            }
             if isAddingTask {
                 newTaskField
                     .padding(.horizontal, 16)
@@ -30,7 +38,7 @@ struct BacklogPanel: View {
             ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: 6) {
                     if backlog.isEmpty && !isAddingTask {
-                        Text("Press ⌘N to add a task.")
+                        emptyMessage(for: filter)
                             .font(.system(size: 12))
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 2)
@@ -38,14 +46,16 @@ struct BacklogPanel: View {
                     }
                     let overdue = backlog.filter(\.isOverdue)
                     if !overdue.isEmpty {
-                        Text("Overdue")
-                            .font(.system(size: 11, weight: .semibold))
-                            .tracking(0.44)
-                            .textCase(.uppercase)
-                            .foregroundStyle(Color.overdue)
-                            .padding(.horizontal, 2)
-                            .accessibilityAddTraits(.isHeader)
-                            .accessibilityIdentifier("backlog-overdue-header")
+                        if filter != .overdue {
+                            Text("Overdue")
+                                .font(.system(size: 11, weight: .semibold))
+                                .tracking(0.44)
+                                .textCase(.uppercase)
+                                .foregroundStyle(Color.overdue)
+                                .padding(.horizontal, 2)
+                                .accessibilityAddTraits(.isHeader)
+                                .accessibilityIdentifier("backlog-overdue-header")
+                        }
                         rows(overdue)
                         if overdue.count < backlog.count {
                             Color.clear.frame(height: 4)
@@ -60,8 +70,7 @@ struct BacklogPanel: View {
             .scrollIndicators(.automatic)
         }
         .padding(.top, 16)
-        .frame(width: Self.width)
-        .frame(maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.backlogBackground)
         .overlay {
             if isDropTargeted {
@@ -85,9 +94,18 @@ struct BacklogPanel: View {
                 isDropTargeted = false
             }
         }
+        .onChange(of: workspace.newTaskRequests) {
+            isNewTaskFieldFocused = true
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("backlog")
-        .focusedSceneValue(\.newTask, beginNewTask)
+    }
+
+    private func emptyMessage(for filter: BacklogFilter) -> Text {
+        switch filter {
+        case .all: Text("Press ⌘N to add a task.")
+        case .overdue: Text("No overdue tasks.")
+        }
     }
 
     private func rows(_ tasks: [TaskItem]) -> some View {
@@ -119,14 +137,6 @@ struct BacklogPanel: View {
             .accessibilityIdentifier("new-task-field")
     }
 
-    private func beginNewTask() {
-        if isAddingTask {
-            isNewTaskFieldFocused = true
-        } else {
-            isAddingTask = true
-        }
-    }
-
     private func commitNewTask() {
         model.add(title: draft, undoManager: undoManager)
         endNewTask()
@@ -134,7 +144,7 @@ struct BacklogPanel: View {
 
     private func endNewTask() {
         draft = ""
-        isAddingTask = false
+        workspace.endNewTask()
     }
 }
 
@@ -165,6 +175,39 @@ private struct BacklogHeader: View {
                 .accessibilityIdentifier("new-task-button")
         }
         .frame(height: 24)
+    }
+}
+
+private struct FilterChip: View {
+    let filter: BacklogFilter
+    let clear: () -> Void
+
+    private var tint: Color {
+        filter == .overdue ? .overdue : .task
+    }
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: filter.systemImage)
+                .font(.system(size: 10.5, weight: .semibold))
+            Text(filter.title)
+                .font(.system(size: 11.5, weight: .semibold))
+            Button("Show All Tasks", systemImage: "xmark", action: clear)
+                .labelStyle(.iconOnly)
+                .buttonStyle(.plain)
+                .font(.system(size: 9, weight: .bold))
+                .frame(width: 14, height: 14)
+                .contentShape(.rect)
+                .help(Text("Show All Tasks"))
+                .accessibilityIdentifier("backlog-filter-clear")
+        }
+        .foregroundStyle(tint)
+        .padding(.leading, 8)
+        .padding(.trailing, 4)
+        .frame(height: 22)
+        .background(Capsule().fill(tint.opacity(0.12)))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("backlog-filter-chip")
     }
 }
 
@@ -207,7 +250,7 @@ private struct BacklogRow: View {
         }
         .contentShape(.rect(cornerRadius: 8))
         .onTapGesture {
-            selection.select(task.id)
+            selection.selectAndShowDetails(task.id)
         }
         .simultaneousGesture(
             TapGesture(count: 2).onEnded {
@@ -218,6 +261,7 @@ private struct BacklogRow: View {
             TaskContextMenu(task: task, model: model, selection: selection, undoManager: undoManager)
         }
         .taskKeyboardHandling(for: task)
+        .taskDetailsPopover(for: task, arrowEdge: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(verbatim: task.title))
         .accessibilityAddTraits(isSelected ? .isSelected : [])

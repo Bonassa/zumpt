@@ -5,6 +5,7 @@ import ZumptKit
 struct RootView: View {
     let calendarModel: CalendarModel
     let taskModel: TaskModel
+    let workspace: Workspace
 
     var body: some View {
         content
@@ -23,7 +24,7 @@ struct RootView: View {
     private var content: some View {
         switch calendarModel.access {
         case .granted:
-            CalendarScreen(model: calendarModel, taskModel: taskModel)
+            CalendarScreen(model: calendarModel, taskModel: taskModel, workspace: workspace)
         case .notDetermined, .denied:
             CalendarAccessView(access: calendarModel.access) {
                 Task {

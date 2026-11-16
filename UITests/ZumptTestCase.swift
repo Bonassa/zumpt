@@ -16,7 +16,8 @@ class ZumptTestCase: XCTestCase {
         tasksStore: String = "memory",
         taskFixture: String? = nil,
         now: String = fixedNow,
-        isDark: Bool = false
+        isDark: Bool = false,
+        preferences: String? = nil
     ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -31,6 +32,9 @@ class ZumptTestCase: XCTestCase {
         }
         if isDark {
             app.launchArguments += ["--appearance", "dark"]
+        }
+        if let preferences {
+            app.launchArguments += ["--preferences", preferences, "--reset-preferences"]
         }
         app.launch()
         addTeardownBlock { @MainActor in app.terminate() }
@@ -93,6 +97,12 @@ class ZumptTestCase: XCTestCase {
             file: file,
             line: line
         )
+    }
+
+    @MainActor
+    func showSidebarTab(_ title: String, in app: XCUIApplication) {
+        app.activate()
+        element("sidebar-tabs", in: app).radioButtons[title].click()
     }
 
     @MainActor

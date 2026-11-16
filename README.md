@@ -49,6 +49,8 @@ They launch the app with options that only exist in Debug builds, so events, tas
 | `--tasks-store memory\|<file>` | Keeps tasks in memory, or in a file inside the app's temporary folder; with `--calendar-fixture` it defaults to `memory` |
 | `--task-fixture <names>` | Adds fictional tasks at launch: `backlog`, `week`, `overdue`, or several as `backlog,week` |
 | `--appearance light\|dark` | Forces the light or dark appearance, whatever the system uses |
+| `--preferences memory\|<suite>` | Keeps the layout (sidebar tab, backlog filter, backlog shown or hidden) in memory, or in a separate defaults suite; with `--calendar-fixture` it defaults to `memory` |
+| `--reset-preferences` | Clears the `--preferences` suite at launch, so a test starts from the default layout |
 
 Each run attaches a screenshot of the window to the result bundle in `.build/DerivedData/Logs/Test/`.
 

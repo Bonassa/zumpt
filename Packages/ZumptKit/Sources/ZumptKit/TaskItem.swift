@@ -71,6 +71,26 @@ public enum Backlog {
     }
 }
 
+public enum BacklogFilter: String, CaseIterable, Identifiable, Sendable {
+    case all
+    case overdue
+
+    public var id: Self {
+        self
+    }
+
+    public func includes(_ task: TaskItem) -> Bool {
+        switch self {
+        case .all: true
+        case .overdue: task.isOverdue
+        }
+    }
+
+    public func tasks(in backlog: [TaskItem]) -> [TaskItem] {
+        backlog.filter(includes)
+    }
+}
+
 public enum OverdueTasks {
     public static func returned(from tasks: [TaskItem], now: Date, calendar: Calendar) -> [TaskItem] {
         let startOfToday = calendar.startOfDay(for: now)
