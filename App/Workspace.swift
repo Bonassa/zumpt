@@ -68,7 +68,14 @@ extension Workspace {
         case .memory:
             Workspace(defaults: nil)
         case .suite(let name):
-            Workspace(defaults: UserDefaults(suiteName: name))
+            Workspace(defaults: suite(named: name, resetting: options.resetsPreferences))
         }
+    }
+
+    private static func suite(named name: String, resetting: Bool) -> UserDefaults? {
+        if resetting {
+            UserDefaults.standard.removePersistentDomain(forName: name)
+        }
+        return UserDefaults(suiteName: name)
     }
 }

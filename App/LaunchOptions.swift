@@ -20,6 +20,7 @@ struct LaunchOptions {
     let taskFixture: String?
     let colorScheme: ColorScheme?
     let preferences: Preferences
+    let resetsPreferences: Bool
 
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         #if DEBUG
@@ -34,9 +35,7 @@ struct LaunchOptions {
             preferences =
                 Self.value(after: "--preferences", in: arguments).map(Self.preferences(named:))
                 ?? (calendarFixtureAccess == nil ? .standard : .memory)
-            if case .suite(let name) = preferences, arguments.contains("--reset-preferences") {
-                UserDefaults.standard.removePersistentDomain(forName: name)
-            }
+            resetsPreferences = arguments.contains("--reset-preferences")
         #else
             now = { Date() }
             calendarFixtureAccess = nil
@@ -44,6 +43,7 @@ struct LaunchOptions {
             taskFixture = nil
             colorScheme = nil
             preferences = .standard
+            resetsPreferences = false
         #endif
     }
 
