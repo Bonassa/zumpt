@@ -47,6 +47,11 @@ private struct BacklogFilterSidebar: View {
                     Label(filter.title, systemImage: filter.systemImage)
                         .badge(filter.tasks(in: backlog).count)
                         .tag(filter)
+                        .simultaneousGesture(
+                            TapGesture().onEnded {
+                                workspace.showBacklog(filter: filter)
+                            }
+                        )
                         .accessibilityIdentifier("backlog-filter-\(filter.rawValue)")
                 }
             }

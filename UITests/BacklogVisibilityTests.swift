@@ -55,6 +55,20 @@ final class BacklogVisibilityTests: ZumptTestCase {
     }
 
     @MainActor
+    func testPickingTheSelectedFilterShowsAHiddenBacklog() {
+        let app = launchApp(taskFixture: "backlog")
+        XCTAssertTrue(element("backlog", in: app).waitForExistence(timeout: 5))
+        click("backlog-toggle", in: app)
+        XCTAssertTrue(element("backlog", in: app).waitForNonExistence(timeout: 2))
+        showSidebarTab("Backlog", in: app)
+
+        click("backlog-filter-all", in: app)
+
+        XCTAssertTrue(element("backlog", in: app).waitForExistence(timeout: 2))
+        XCTAssertTrue(element("backlog-task-Marcar dentista", in: app).exists)
+    }
+
+    @MainActor
     func testKeepsTheLayoutAfterQuittingAndOpeningAgain() {
         let app = launchApp(taskFixture: "backlog", preferences: "zumpt-ui-tests-layout")
         XCTAssertTrue(element("backlog", in: app).waitForExistence(timeout: 5))
