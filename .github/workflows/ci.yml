@@ -51,13 +51,20 @@ jobs:
         shell: bash
         run: |
           for bundle in .build/DerivedData/Logs/Test/*.xcresult; do
-            xcrun xcresulttool get test-results summary --path "$bundle" --format json > summary.json
+            xcrun xcresulttool get test-results tests --path "$bundle" --format json > tests.json
             python3 - <<'PY'
           import json
-          for failure in json.load(open("summary.json")).get("testFailures", []):
-              name = failure.get("testIdentifierString", "?")
-              text = failure.get("failureText", "").replace("\n", " ")
-              print("::error title=" + name + "::" + text)
+
+          def walk(node, test):
+              if node.get("nodeType") == "Test Case":
+                  test = node.get("nodeIdentifier", node.get("name", "?"))
+              if node.get("nodeType") == "Failure Message":
+                  print("::error title=" + test + "::" + node.get("name", "").replace("\n", " "))
+              for child in node.get("children", []):
+                  walk(child, test)
+
+          for root in json.load(open("tests.json")).get("testNodes", []):
+              walk(root, "?")
           PY
           done
 
