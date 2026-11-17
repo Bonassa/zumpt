@@ -154,11 +154,12 @@ class ZumptTestCase: XCTestCase {
         line: UInt = #line
     ) {
         let gap = waitForWorkdayStartAtTheTop(in: app)
+        let layout = abs(gap - Self.workdayStartGap) > 2 ? layoutDescription(of: app) : ""
         XCTAssertEqual(
             gap,
             Self.workdayStartGap,
             accuracy: 2,
-            "08:00 should sit right below the all-day row",
+            "08:00 should sit right below the all-day row. \(layout)",
             file: file,
             line: line
         )
@@ -177,6 +178,19 @@ class ZumptTestCase: XCTestCase {
             gap = workdayStartGap(in: app)
         }
         return gap
+    }
+
+    @MainActor
+    private func layoutDescription(of app: XCUIApplication) -> String {
+        let elements = [
+            ("window", app.windows.firstMatch),
+            ("first scroll view", app.scrollViews.firstMatch),
+            ("all-day row", element("all-day-row", in: app)),
+            ("01:00", element("hour-label-1", in: app)),
+            ("08:00", element("hour-label-8", in: app)),
+            ("23:00", element("hour-label-23", in: app)),
+        ]
+        return elements.map { "\($0.0): \($0.1.exists ? "\($0.1.frame)" : "missing")" }.joined(separator: "; ")
     }
 
     @MainActor
