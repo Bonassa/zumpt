@@ -41,6 +41,7 @@ struct WeekGrid: View {
     @State private var selectedEventID: String?
 
     var body: some View {
+        let workdayStartY = Self.workdayStartY
         VStack(spacing: 0) {
             DayHeaderRow(days: week.days, calendar: calendar, now: now)
             Rectangle().fill(Color.gridLine).frame(height: 1)
@@ -78,14 +79,31 @@ struct WeekGrid: View {
                 .padding(.bottom, WeekGridMetrics.bottomPadding)
             }
             .scrollPosition($scrollPosition)
-            .onScrollGeometryChange(for: Bool.self) { geometry in
-                geometry.containerSize.height > 0 && geometry.contentSize.height > geometry.containerSize.height
-            } action: { _, canScroll in
-                guard canScroll, !hasShownWorkdayStart else {
+            .onScrollGeometryChange(for: Bool?.self) { geometry in
+                let maxOffset = geometry.contentSize.height - geometry.containerSize.height
+                guard geometry.containerSize.height > 0, maxOffset > 0 else {
+                    return nil
+                }
+                let offset = geometry.contentOffset.y + geometry.contentInsets.top
+                return abs(offset - min(workdayStartY, maxOffset)) < 1
+            } action: { _, isAtWorkdayStart in
+                guard let isAtWorkdayStart, !hasShownWorkdayStart else {
                     return
                 }
-                hasShownWorkdayStart = true
-                scrollPosition.scrollTo(y: Self.workdayStartY)
+                if isAtWorkdayStart {
+                    hasShownWorkdayStart = true
+                } else {
+                    scrollPosition.scrollTo(y: workdayStartY)
+                }
+            }
+            .task {
+                // The geometry above only reports changes. When the window opens at its final size, as on a first
+                // launch, the grid can scroll from its very first layout and nothing changes, so ask again until
+                // the scroll lands.
+                for _ in 0..<20 where !hasShownWorkdayStart {
+                    scrollPosition.scrollTo(y: workdayStartY)
+                    try? await Task.sleep(for: .milliseconds(50))
+                }
             }
             .scrollIndicators(.never)
         }
