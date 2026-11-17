@@ -36,13 +36,12 @@ struct WeekGrid: View {
 
     @State private var scrollPosition = ScrollPosition(y: Self.workdayStartY)
     @State private var hasShownWorkdayStart = false
-    // TEMPORARY: a timeline of the week's scrolling, read by the UI tests while the CI scroll issue is diagnosed.
-    @State private var scrollLog = ScrollLog()
 
     private static let workdayStartY = WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
     @State private var selectedEventID: String?
 
     var body: some View {
+        let workdayStartY = Self.workdayStartY
         VStack(spacing: 0) {
             DayHeaderRow(days: week.days, calendar: calendar, now: now)
             Rectangle().fill(Color.gridLine).frame(height: 1)
@@ -80,36 +79,28 @@ struct WeekGrid: View {
                 .padding(.bottom, WeekGridMetrics.bottomPadding)
             }
             .scrollPosition($scrollPosition)
-            .onScrollGeometryChange(for: Bool.self) { geometry in
-                geometry.containerSize.height > 0 && geometry.contentSize.height > geometry.containerSize.height
-            } action: { _, canScroll in
-                scrollLog.add("canScroll \(canScroll)")
-                guard canScroll, !hasShownWorkdayStart else {
-                    return
+            .onScrollGeometryChange(for: CGFloat?.self) { geometry in
+                let maxOffset = geometry.contentSize.height - geometry.containerSize.height
+                guard geometry.containerSize.height > 0, maxOffset > 0 else {
+                    return nil
                 }
-                hasShownWorkdayStart = true
-                scrollPosition.scrollTo(y: Self.workdayStartY)
-                scrollLog.add("scrollTo 448")
-            }
-            .scrollIndicators(.never)
-            .onScrollGeometryChange(for: String.self) { geometry in
-                [geometry.contentOffset.y, geometry.contentSize.height, geometry.containerSize.height]
-                    .map { "\(Int($0))" }
-                    .joined(separator: "/")
-            } action: { _, geometry in
-                scrollLog.add(geometry)
+                let offset = geometry.contentOffset.y + geometry.contentInsets.top
+                return abs(offset - min(workdayStartY, maxOffset))
+            } action: { _, distanceFromWorkdayStart in
+                if let distanceFromWorkdayStart, distanceFromWorkdayStart <= 1.5 {
+                    hasShownWorkdayStart = true
+                }
             }
             .task {
-                scrollLog.add("appear, position \(scrollPosition.point.map { "\(Int($0.y))" } ?? "none")")
-                try? await Task.sleep(for: .milliseconds(1500))
-                scrollPosition.scrollTo(y: 300)
-                scrollLog.add("late scrollTo 300")
-                try? await Task.sleep(for: .milliseconds(1000))
-                scrollPosition.scrollTo(y: Self.workdayStartY)
-                scrollLog.add("late scrollTo 448")
+                // A machine still busy launching the app can ignore scroll requests made right after the window
+                // appears, so keep asking until the week shows 08:00. Every other request is a point lower, so each
+                // one moves the grid and reports where it landed, even when it already sits at 08:00.
+                for attempt in 0..<50 where !hasShownWorkdayStart {
+                    scrollPosition.scrollTo(y: workdayStartY + (attempt.isMultiple(of: 2) ? 0 : 1))
+                    try? await Task.sleep(for: .milliseconds(100))
+                }
             }
-            .accessibilityIdentifier("week-scroll")
-            .accessibilityValue(scrollLog.text)
+            .scrollIndicators(.never)
         }
     }
 
@@ -351,15 +342,5 @@ private struct HourGutter: View {
             return ""
         }
         return date.formatted(style)
-    }
-}
-
-// TEMPORARY: see `WeekGrid.scrollLog`.
-private struct ScrollLog {
-    private let start = Date.now
-    private(set) var text = ""
-
-    mutating func add(_ entry: String) {
-        text += String(format: "%.2f ", Date.now.timeIntervalSince(start)) + entry + " | "
     }
 }

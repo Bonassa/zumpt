@@ -170,7 +170,7 @@ class ZumptTestCase: XCTestCase {
     /// The week scrolls to 08:00 once it is laid out, which can land a moment after the window shows up.
     @MainActor
     @discardableResult
-    func waitForWorkdayStartAtTheTop(in app: XCUIApplication, timeout: TimeInterval = 4) -> CGFloat {
+    func waitForWorkdayStartAtTheTop(in app: XCUIApplication, timeout: TimeInterval = 5) -> CGFloat {
         let deadline = Date.now.addingTimeInterval(timeout)
         var gap = workdayStartGap(in: app)
         while abs(gap - Self.workdayStartGap) > 2, Date.now < deadline {
@@ -182,11 +182,6 @@ class ZumptTestCase: XCTestCase {
 
     @MainActor
     private func layoutDescription(of app: XCUIApplication) -> String {
-        let weekScroll = element("week-scroll", in: app)
-        var scrollState = "missing"
-        if weekScroll.exists {
-            scrollState = "\(weekScroll.frame) \((weekScroll.value as? String) ?? "no value")"
-        }
         let elements = [
             ("window", app.windows.firstMatch),
             ("all-day row", element("all-day-row", in: app)),
@@ -194,8 +189,7 @@ class ZumptTestCase: XCTestCase {
             ("08:00", element("hour-label-8", in: app)),
             ("23:00", element("hour-label-23", in: app)),
         ]
-        let frames = elements.map { "\($0.0): \($0.1.exists ? "\($0.1.frame)" : "missing")" }
-        return (frames + ["week scroll: \(scrollState)"]).joined(separator: "; ")
+        return elements.map { "\($0.0): \($0.1.exists ? "\($0.1.frame)" : "missing")" }.joined(separator: "; ")
     }
 
     @MainActor
