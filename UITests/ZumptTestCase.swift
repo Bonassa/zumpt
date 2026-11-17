@@ -183,7 +183,8 @@ class ZumptTestCase: XCTestCase {
     @MainActor
     private func layoutDescription(of app: XCUIApplication) -> String {
         let weekScroll = element("week-scroll", in: app)
-        let scrollState = weekScroll.exists ? "\(weekScroll.frame) \((weekScroll.value as? String) ?? "no value")" : "missing"
+        let scrollValue = (weekScroll.value as? String) ?? "no value"
+        let scrollState = weekScroll.exists ? "\(weekScroll.frame) \(scrollValue)" : "missing"
         let elements = [
             ("window", app.windows.firstMatch),
             ("all-day row", element("all-day-row", in: app)),
