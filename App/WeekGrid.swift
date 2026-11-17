@@ -35,6 +35,8 @@ struct WeekGrid: View {
     let now: Date
 
     @State private var hasShownWorkdayStart = false
+    // TEMPORARY: what the week's scroll view reports, read by the UI tests while the CI scroll issue is diagnosed.
+    @State private var scrollDiagnostics = ScrollDiagnostics()
 
     private static let workdayStartY = WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
     private static let workdayStartID = "workday-start"
@@ -98,6 +100,7 @@ struct WeekGrid: View {
                     let offset = geometry.contentOffset.y + geometry.contentInsets.top
                     return abs(offset - min(workdayStartY, maxOffset)) < 1
                 } action: { _, isAtWorkdayStart in
+                    scrollDiagnostics.actions += 1
                     guard let isAtWorkdayStart, !hasShownWorkdayStart else {
                         return
                     }
@@ -112,11 +115,26 @@ struct WeekGrid: View {
                     // first launch, the grid can scroll from its very first layout and nothing changes, so ask
                     // again until the scroll lands.
                     for _ in 0..<20 where !hasShownWorkdayStart {
+                        scrollDiagnostics.attempts += 1
                         proxy.scrollTo(Self.workdayStartID, anchor: .top)
                         try? await Task.sleep(for: .milliseconds(50))
                     }
                 }
                 .scrollIndicators(.never)
+                .onScrollGeometryChange(for: String.self) { geometry in
+                    [geometry.contentOffset.y, geometry.contentSize.height, geometry.containerSize.height]
+                        .map { "\(Int($0))" }
+                        .joined(separator: "/")
+                } action: { _, geometry in
+                    scrollDiagnostics.geometry = geometry
+                }
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { height in
+                    scrollDiagnostics.height = Int(height)
+                }
+                .accessibilityIdentifier("week-scroll")
+                .accessibilityValue(scrollDiagnostics.summary)
             }
         }
     }
@@ -359,5 +377,17 @@ private struct HourGutter: View {
             return ""
         }
         return date.formatted(style)
+    }
+}
+
+// TEMPORARY: see `WeekGrid.scrollDiagnostics`.
+private struct ScrollDiagnostics {
+    var actions = 0
+    var attempts = 0
+    var geometry = "none"
+    var height = -1
+
+    var summary: String {
+        "offset/content/container \(geometry), height \(height), actions \(actions), attempts \(attempts)"
     }
 }

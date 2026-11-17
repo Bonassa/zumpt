@@ -182,15 +182,17 @@ class ZumptTestCase: XCTestCase {
 
     @MainActor
     private func layoutDescription(of app: XCUIApplication) -> String {
+        let weekScroll = element("week-scroll", in: app)
+        let scrollState = weekScroll.exists ? "\(weekScroll.frame) \((weekScroll.value as? String) ?? "no value")" : "missing"
         let elements = [
             ("window", app.windows.firstMatch),
-            ("first scroll view", app.scrollViews.firstMatch),
             ("all-day row", element("all-day-row", in: app)),
             ("01:00", element("hour-label-1", in: app)),
             ("08:00", element("hour-label-8", in: app)),
             ("23:00", element("hour-label-23", in: app)),
         ]
-        return elements.map { "\($0.0): \($0.1.exists ? "\($0.1.frame)" : "missing")" }.joined(separator: "; ")
+        let frames = elements.map { "\($0.0): \($0.1.exists ? "\($0.1.frame)" : "missing")" }
+        return (frames + ["week scroll: \(scrollState)"]).joined(separator: "; ")
     }
 
     @MainActor
