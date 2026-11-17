@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install XcodeGen
         run: which xcodegen || brew install xcodegen
@@ -30,12 +30,30 @@ jobs:
       - name: Unit tests
         run: make test-unit
 
+      - name: Show display
+        run: system_profiler SPDisplaysDataType | grep -iE 'resolution|display type' || true
+
       - name: UI tests
         run: make test-ui
 
+      - name: Show UI test failures
+        if: failure()
+        shell: bash
+        run: |
+          for bundle in .build/DerivedData/Logs/Test/*.xcresult; do
+            xcrun xcresulttool get test-results summary --path "$bundle" --format json > summary.json
+            python3 - <<'PY'
+          import json
+          for failure in json.load(open("summary.json")).get("testFailures", []):
+              name = failure.get("testIdentifierString", "?")
+              text = failure.get("failureText", "").replace("\n", " ")
+              print("::error title=" + name + "::" + text)
+          PY
+          done
+
       - name: Upload UI test results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ui-test-results
           path: .build/DerivedData/Logs/Test/*.xcresult
