@@ -35,7 +35,8 @@ struct WeekGrid: View {
     let now: Date
 
     @State private var scrollPosition = ScrollPosition(y: Self.workdayStartY)
-    @State private var hasShownWorkdayStart = false
+    @State private var distanceFromWorkdayStart: CGFloat?
+    @State private var hasUserScrolled = false
 
     private static let workdayStartY = WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
     @State private var selectedEventID: String?
@@ -86,17 +87,23 @@ struct WeekGrid: View {
                 }
                 let offset = geometry.contentOffset.y + geometry.contentInsets.top
                 return abs(offset - min(workdayStartY, maxOffset))
-            } action: { _, distanceFromWorkdayStart in
-                if let distanceFromWorkdayStart, distanceFromWorkdayStart <= 1.5 {
-                    hasShownWorkdayStart = true
+            } action: { _, distance in
+                distanceFromWorkdayStart = distance
+            }
+            .onScrollPhaseChange { _, phase in
+                if phase == .tracking || phase == .interacting || phase == .decelerating {
+                    hasUserScrolled = true
                 }
             }
             .task {
                 // A machine still busy launching the app can ignore scroll requests made right after the window
-                // appears, so keep asking until the week shows 08:00. Every other request is a point lower, so each
-                // one moves the grid and reports where it landed, even when it already sits at 08:00.
-                for attempt in 0..<50 where !hasShownWorkdayStart {
-                    scrollPosition.scrollTo(y: workdayStartY + (attempt.isMultiple(of: 2) ? 0 : 1))
+                // appears, or put the grid back at midnight once it got to 08:00. Until the user scrolls, check
+                // where the week sits for a few seconds and ask for 08:00 again whenever it is somewhere else.
+                // Requests alternate by a point so that each one differs from the position asked for before it.
+                for attempt in 0..<50 where !hasUserScrolled {
+                    if (distanceFromWorkdayStart ?? .infinity) > 1.5 {
+                        scrollPosition.scrollTo(y: workdayStartY + (attempt.isMultiple(of: 2) ? 0 : 1))
+                    }
                     try? await Task.sleep(for: .milliseconds(100))
                 }
             }
