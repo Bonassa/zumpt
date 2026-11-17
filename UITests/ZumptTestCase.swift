@@ -170,7 +170,7 @@ class ZumptTestCase: XCTestCase {
     /// The week scrolls to 08:00 once it is laid out, which can land a moment after the window shows up.
     @MainActor
     @discardableResult
-    func waitForWorkdayStartAtTheTop(in app: XCUIApplication, timeout: TimeInterval = 3) -> CGFloat {
+    func waitForWorkdayStartAtTheTop(in app: XCUIApplication, timeout: TimeInterval = 4) -> CGFloat {
         let deadline = Date.now.addingTimeInterval(timeout)
         var gap = workdayStartGap(in: app)
         while abs(gap - Self.workdayStartGap) > 2, Date.now < deadline {

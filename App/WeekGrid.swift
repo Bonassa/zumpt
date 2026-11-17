@@ -34,16 +34,15 @@ struct WeekGrid: View {
     let calendar: Calendar
     let now: Date
 
+    @State private var scrollPosition = ScrollPosition(y: Self.workdayStartY)
     @State private var hasShownWorkdayStart = false
-    // TEMPORARY: what the week's scroll view reports, read by the UI tests while the CI scroll issue is diagnosed.
-    @State private var scrollDiagnostics = ScrollDiagnostics()
+    // TEMPORARY: a timeline of the week's scrolling, read by the UI tests while the CI scroll issue is diagnosed.
+    @State private var scrollLog = ScrollLog()
 
     private static let workdayStartY = WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
-    private static let workdayStartID = "workday-start"
     @State private var selectedEventID: String?
 
     var body: some View {
-        let workdayStartY = Self.workdayStartY
         VStack(spacing: 0) {
             DayHeaderRow(days: week.days, calendar: calendar, now: now)
             Rectangle().fill(Color.gridLine).frame(height: 1)
@@ -55,87 +54,62 @@ struct WeekGrid: View {
                 selectedEventID: $selectedEventID
             )
             Rectangle().fill(Color.strongGridLine).frame(height: 1)
-            ScrollViewReader { proxy in
-                ScrollView(.vertical) {
-                    HStack(alignment: .top, spacing: 0) {
-                        HourGutter(calendar: calendar, nowMinute: nowMinute)
-                            .frame(width: WeekGridMetrics.gutterWidth)
-                        WeightedColumns {
-                            ForEach(week.days, id: \.self) { day in
-                                DayColumn(
-                                    day: day,
-                                    items: DayLayout.timedItems(
-                                        events: events,
-                                        tasks: tasks,
-                                        on: day,
-                                        calendar: calendar
-                                    ),
-                                    colors: colors,
-                                    isWeekend: calendar.isDateInWeekend(day),
-                                    nowMinute: calendar.isDate(day, inSameDayAs: now) ? nowMinute : nil,
-                                    calendar: calendar,
-                                    selectedEventID: $selectedEventID
-                                )
-                                .layoutValue(
-                                    key: ColumnWeight.self,
-                                    value: WeekGridMetrics.weight(of: day, calendar: calendar)
-                                )
-                            }
+            ScrollView(.vertical) {
+                HStack(alignment: .top, spacing: 0) {
+                    HourGutter(calendar: calendar, nowMinute: nowMinute)
+                        .frame(width: WeekGridMetrics.gutterWidth)
+                    WeightedColumns {
+                        ForEach(week.days, id: \.self) { day in
+                            DayColumn(
+                                day: day,
+                                items: DayLayout.timedItems(events: events, tasks: tasks, on: day, calendar: calendar),
+                                colors: colors,
+                                isWeekend: calendar.isDateInWeekend(day),
+                                nowMinute: calendar.isDate(day, inSameDayAs: now) ? nowMinute : nil,
+                                calendar: calendar,
+                                selectedEventID: $selectedEventID
+                            )
+                            .layoutValue(
+                                key: ColumnWeight.self,
+                                value: WeekGridMetrics.weight(of: day, calendar: calendar)
+                            )
                         }
                     }
-                    .padding(.top, WeekGridMetrics.topPadding)
-                    .overlay(alignment: .topLeading) {
-                        Color.clear
-                            .frame(width: 1, height: 1)
-                            .padding(.top, Self.workdayStartY)
-                            .id(Self.workdayStartID)
-                    }
-                    .padding(.bottom, WeekGridMetrics.bottomPadding)
                 }
-                .onScrollGeometryChange(for: Bool?.self) { geometry in
-                    let maxOffset = geometry.contentSize.height - geometry.containerSize.height
-                    guard geometry.containerSize.height > 0, maxOffset > 0 else {
-                        return nil
-                    }
-                    let offset = geometry.contentOffset.y + geometry.contentInsets.top
-                    return abs(offset - min(workdayStartY, maxOffset)) < 1
-                } action: { _, isAtWorkdayStart in
-                    scrollDiagnostics.actions += 1
-                    guard let isAtWorkdayStart, !hasShownWorkdayStart else {
-                        return
-                    }
-                    if isAtWorkdayStart {
-                        hasShownWorkdayStart = true
-                    } else {
-                        proxy.scrollTo(Self.workdayStartID, anchor: .top)
-                    }
-                }
-                .task {
-                    // The geometry above only reports changes. When the window opens at its final size, as on a
-                    // first launch, the grid can scroll from its very first layout and nothing changes, so ask
-                    // again until the scroll lands.
-                    for _ in 0..<20 where !hasShownWorkdayStart {
-                        scrollDiagnostics.attempts += 1
-                        proxy.scrollTo(Self.workdayStartID, anchor: .top)
-                        try? await Task.sleep(for: .milliseconds(50))
-                    }
-                }
-                .scrollIndicators(.never)
-                .onScrollGeometryChange(for: String.self) { geometry in
-                    [geometry.contentOffset.y, geometry.contentSize.height, geometry.containerSize.height]
-                        .map { "\(Int($0))" }
-                        .joined(separator: "/")
-                } action: { _, geometry in
-                    scrollDiagnostics.geometry = geometry
-                }
-                .onGeometryChange(for: CGFloat.self) { proxy in
-                    proxy.size.height
-                } action: { height in
-                    scrollDiagnostics.height = Int(height)
-                }
-                .accessibilityIdentifier("week-scroll")
-                .accessibilityValue(scrollDiagnostics.summary)
+                .padding(.top, WeekGridMetrics.topPadding)
+                .padding(.bottom, WeekGridMetrics.bottomPadding)
             }
+            .scrollPosition($scrollPosition)
+            .onScrollGeometryChange(for: Bool.self) { geometry in
+                geometry.containerSize.height > 0 && geometry.contentSize.height > geometry.containerSize.height
+            } action: { _, canScroll in
+                scrollLog.add("canScroll \(canScroll)")
+                guard canScroll, !hasShownWorkdayStart else {
+                    return
+                }
+                hasShownWorkdayStart = true
+                scrollPosition.scrollTo(y: Self.workdayStartY)
+                scrollLog.add("scrollTo 448")
+            }
+            .scrollIndicators(.never)
+            .onScrollGeometryChange(for: String.self) { geometry in
+                [geometry.contentOffset.y, geometry.contentSize.height, geometry.containerSize.height]
+                    .map { "\(Int($0))" }
+                    .joined(separator: "/")
+            } action: { _, geometry in
+                scrollLog.add(geometry)
+            }
+            .task {
+                scrollLog.add("appear, position \(scrollPosition.point.map { "\(Int($0.y))" } ?? "none")")
+                try? await Task.sleep(for: .milliseconds(1500))
+                scrollPosition.scrollTo(y: 300)
+                scrollLog.add("late scrollTo 300")
+                try? await Task.sleep(for: .milliseconds(1000))
+                scrollPosition.scrollTo(y: Self.workdayStartY)
+                scrollLog.add("late scrollTo 448")
+            }
+            .accessibilityIdentifier("week-scroll")
+            .accessibilityValue(scrollLog.text)
         }
     }
 
@@ -380,14 +354,12 @@ private struct HourGutter: View {
     }
 }
 
-// TEMPORARY: see `WeekGrid.scrollDiagnostics`.
-private struct ScrollDiagnostics {
-    var actions = 0
-    var attempts = 0
-    var geometry = "none"
-    var height = -1
+// TEMPORARY: see `WeekGrid.scrollLog`.
+private struct ScrollLog {
+    private let start = Date.now
+    private(set) var text = ""
 
-    var summary: String {
-        "offset/content/container \(geometry), height \(height), actions \(actions), attempts \(attempts)"
+    mutating func add(_ entry: String) {
+        text += String(format: "%.2f ", Date.now.timeIntervalSince(start)) + entry + " | "
     }
 }
