@@ -1,6 +1,6 @@
 # PRD-002: Always present
 
-Status: Draft · Stage 4 · Updated 2026-11-18
+Status: Draft · Stage 5 · Updated 2026-11-18
 
 ## 1. Problem
 

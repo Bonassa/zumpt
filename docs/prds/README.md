@@ -2,11 +2,13 @@
 
 One file per PRD, named `NNN-short-title.md` and numbered in sequence.
 The big picture and the order of the stages live in [ROADMAP.md](../ROADMAP.md).
+PRD numbers identify documents; delivery order follows the roadmap.
 
 ## PRDs
 
 - [001](001-tasks-in-the-week.md): Tasks in the week · Stage 3 · Done
-- [002](002-always-present.md): Always present · Stage 4 · Draft
+- [002](002-always-present.md): Always present · Stage 5 · Draft
+- [003](003-recurring-tasks.md): Recurring tasks · Stage 4 · Draft
 
 ## Rules for every PRD
 
@@ -23,6 +25,6 @@ The big picture and the order of the stages live in [ROADMAP.md](../ROADMAP.md).
 
 ## Adding a PRD
 
-1. Copy [TEMPLATE.md](TEMPLATE.md) to the next number, such as `002-mini-month.md`.
+1. Copy [TEMPLATE.md](TEMPLATE.md) to the next number, such as `004-mini-month.md`.
 2. Fill in the four sections, following the rules above.
 3. Add it to the list above as `- [NNN](NNN-short-title.md): Title · Stage N · Draft`.
