@@ -62,6 +62,7 @@ class ZumptTestCase: XCTestCase {
 
     @MainActor
     func drag(_ identifier: String, toDay day: String, hour: Int, in app: XCUIApplication) {
+        waitForWorkdayStartAtTheTop(in: app)
         let column = element("day-column-\(day)", in: app)
         let hourLabel = element("hour-label-\(hour)", in: app)
         XCTAssertTrue(column.exists && hourLabel.exists, "Day \(day) and hour \(hour) should be on screen")
@@ -152,8 +153,48 @@ class ZumptTestCase: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        let gap = element("hour-label-8", in: app).frame.midY - element("all-day-row", in: app).frame.maxY
-        XCTAssertEqual(gap, 10.5, accuracy: 2, "08:00 should sit right below the all-day row", file: file, line: line)
+        let gap = waitForWorkdayStartAtTheTop(in: app)
+        let layout = abs(gap - Self.workdayStartGap) > 2 ? layoutDescription(of: app) : ""
+        XCTAssertEqual(
+            gap,
+            Self.workdayStartGap,
+            accuracy: 2,
+            "08:00 should sit right below the all-day row. \(layout)",
+            file: file,
+            line: line
+        )
+    }
+
+    static let workdayStartGap: CGFloat = 10.5
+
+    /// The week scrolls to 08:00 once it is laid out, which can land a moment after the window shows up.
+    @MainActor
+    @discardableResult
+    func waitForWorkdayStartAtTheTop(in app: XCUIApplication, timeout: TimeInterval = 5) -> CGFloat {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        var gap = workdayStartGap(in: app)
+        while abs(gap - Self.workdayStartGap) > 2, Date.now < deadline {
+            RunLoop.current.run(until: Date.now.addingTimeInterval(0.1))
+            gap = workdayStartGap(in: app)
+        }
+        return gap
+    }
+
+    @MainActor
+    private func layoutDescription(of app: XCUIApplication) -> String {
+        let elements = [
+            ("window", app.windows.firstMatch),
+            ("all-day row", element("all-day-row", in: app)),
+            ("01:00", element("hour-label-1", in: app)),
+            ("08:00", element("hour-label-8", in: app)),
+            ("23:00", element("hour-label-23", in: app)),
+        ]
+        return elements.map { "\($0.0): \($0.1.exists ? "\($0.1.frame)" : "missing")" }.joined(separator: "; ")
+    }
+
+    @MainActor
+    private func workdayStartGap(in app: XCUIApplication) -> CGFloat {
+        element("hour-label-8", in: app).frame.midY - element("all-day-row", in: app).frame.maxY
     }
 
     @MainActor

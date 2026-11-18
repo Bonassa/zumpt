@@ -35,12 +35,14 @@ struct WeekGrid: View {
     let now: Date
 
     @State private var scrollPosition = ScrollPosition(y: Self.workdayStartY)
-    @State private var hasShownWorkdayStart = false
+    @State private var distanceFromWorkdayStart: CGFloat?
+    @State private var hasUserScrolled = false
 
     private static let workdayStartY = WeekGridMetrics.y(forMinute: WeekGridMetrics.firstVisibleHour * 60)
     @State private var selectedEventID: String?
 
     var body: some View {
+        let workdayStartY = Self.workdayStartY
         VStack(spacing: 0) {
             DayHeaderRow(days: week.days, calendar: calendar, now: now)
             Rectangle().fill(Color.gridLine).frame(height: 1)
@@ -78,14 +80,32 @@ struct WeekGrid: View {
                 .padding(.bottom, WeekGridMetrics.bottomPadding)
             }
             .scrollPosition($scrollPosition)
-            .onScrollGeometryChange(for: Bool.self) { geometry in
-                geometry.containerSize.height > 0 && geometry.contentSize.height > geometry.containerSize.height
-            } action: { _, canScroll in
-                guard canScroll, !hasShownWorkdayStart else {
-                    return
+            .onScrollGeometryChange(for: CGFloat?.self) { geometry in
+                let maxOffset = geometry.contentSize.height - geometry.containerSize.height
+                guard geometry.containerSize.height > 0, maxOffset > 0 else {
+                    return nil
                 }
-                hasShownWorkdayStart = true
-                scrollPosition.scrollTo(y: Self.workdayStartY)
+                let offset = geometry.contentOffset.y + geometry.contentInsets.top
+                return abs(offset - min(workdayStartY, maxOffset))
+            } action: { _, distance in
+                distanceFromWorkdayStart = distance
+            }
+            .onScrollPhaseChange { _, phase in
+                if phase == .tracking || phase == .interacting || phase == .decelerating {
+                    hasUserScrolled = true
+                }
+            }
+            .task {
+                // A machine still busy launching the app can ignore scroll requests made right after the window
+                // appears, or put the grid back at midnight once it got to 08:00. Until the user scrolls, check
+                // where the week sits for a few seconds and ask for 08:00 again whenever it is somewhere else.
+                // Requests alternate by a point so that each one differs from the position asked for before it.
+                for attempt in 0..<50 where !hasUserScrolled {
+                    if (distanceFromWorkdayStart ?? .infinity) > 1.5 {
+                        scrollPosition.scrollTo(y: workdayStartY + (attempt.isMultiple(of: 2) ? 0 : 1))
+                    }
+                    try? await Task.sleep(for: .milliseconds(100))
+                }
             }
             .scrollIndicators(.never)
         }
