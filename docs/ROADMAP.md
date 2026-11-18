@@ -40,7 +40,7 @@ Stages are ordered by how much they help Zumpt replace the calendar used all day
 
 | Stage | Scope | PRD |
 | --- | --- | --- |
-| 4. Always present | Menu bar item with the next meeting and today's tasks, launch at login, global shortcut to add a task, notifications for scheduled tasks | Not written |
+| 4. Always present | Menu bar item with the next meeting and today's tasks, launch at login, global shortcut to add a task, notifications for scheduled tasks | [PRD-002](prds/002-always-present.md) · Draft |
 | 5. Navigation | Mini month in the sidebar, Day and Month views, Events, Tasks and Completed filters, search | Not written |
 | 6. Organization | Scopes (Personal and Work), projects, subtasks, due dates, recurring tasks | Not written |
 | 7. Smart scheduling | Free slots between meetings, fit the backlog into free time automatically, natural-language quick add such as "Review contract tomorrow 3pm #Work" | Not written |
