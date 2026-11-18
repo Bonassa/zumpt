@@ -40,7 +40,7 @@ Stages follow the current product priorities. Recurring tasks come next, before 
 
 | Stage | Scope | PRD |
 | --- | --- | --- |
-| 4. Recurring tasks | Daily, weekly, monthly and yearly task series, independent occurrences, overdue handling and series editing | [PRD-003](prds/003-recurring-tasks.md) · Draft |
+| 4. Recurring tasks | Daily, weekly, monthly and yearly task series in the calendar, independent dated occurrences, overdue handling and series editing | [PRD-003](prds/003-recurring-tasks.md) · Draft |
 | 5. Always present | Menu bar item with the next meeting and today's tasks, launch at login, global shortcut to add a task, notifications for scheduled tasks | [PRD-002](prds/002-always-present.md) · Draft |
 | 6. Navigation | Mini month in the sidebar, Day and Month views, Events, Tasks and Completed filters, search | Not written |
 | 7. Organization | Scopes (Personal and Work), projects, subtasks, due dates | Not written |
