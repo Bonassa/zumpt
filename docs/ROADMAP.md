@@ -36,14 +36,15 @@ Every feature is judged by one question: is Zumpt at least as good as the Calend
 
 ## Next
 
-Stages are ordered by how much they help Zumpt replace the calendar used all day.
+Stages follow the current product priorities. Recurring tasks come next, before always-present features.
 
 | Stage | Scope | PRD |
 | --- | --- | --- |
-| 4. Always present | Menu bar item with the next meeting and today's tasks, launch at login, global shortcut to add a task, notifications for scheduled tasks | Not written |
-| 5. Navigation | Mini month in the sidebar, Day and Month views, Events, Tasks and Completed filters, search | Not written |
-| 6. Organization | Scopes (Personal and Work), projects, subtasks, due dates, recurring tasks | Not written |
-| 7. Smart scheduling | Free slots between meetings, fit the backlog into free time automatically, natural-language quick add such as "Review contract tomorrow 3pm #Work" | Not written |
+| 4. Recurring tasks | Daily, weekly, monthly and yearly task series in the calendar, independent dated occurrences, overdue handling and series editing | [PRD-003](prds/003-recurring-tasks.md) · Draft |
+| 5. Always present | Menu bar item with the next meeting and today's tasks, launch at login, global shortcut to add a task, notifications for scheduled tasks | [PRD-002](prds/002-always-present.md) · Draft |
+| 6. Navigation | Mini month in the sidebar, Day and Month views, Events, Tasks and Completed filters, search | Not written |
+| 7. Organization | Scopes (Personal and Work), projects, subtasks, due dates | Not written |
+| 8. Smart scheduling | Free slots between meetings, fit the backlog into free time automatically, natural-language quick add such as "Review contract tomorrow 3pm #Work" | Not written |
 | Later | iPhone app and widgets with CloudKit sync | Not written |
 
 ## Out of scope
