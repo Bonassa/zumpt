@@ -1,6 +1,6 @@
 # PRD-003: Recurring tasks
 
-Status: Draft · Stage 4 · Updated 2026-11-18
+Status: Draft · Stage 4 · Updated 2026-11-23
 
 ## 1. Problem
 
@@ -20,7 +20,7 @@ Recurrence comes before menu bar features and reminders.
 - Every occurrence has a date and stays in the calendar, never the backlog. Timed ones last 30 minutes; date-only ones appear in the all-day row.
 - Fixed dates are independent of completion. After its day ends, an unfinished occurrence stays on its date, marked overdue. Reopening marks missed occurrences overdue without duplicates.
 - Completing, reopening or rescheduling affects one occurrence. Dates cannot be cleared and backlog drops are blocked. Renaming or deleting offers "This occurrence" and "This and following"; rule changes apply from the selected occurrence onward.
-- Following means original recurrence dates. Series changes preserve earlier history and completed occurrences. Stopping repetition keeps the selected occurrence and removes later unfinished ones.
+- Following means original recurrence dates. Series changes preserve earlier history and completed occurrences.
 - Missing monthly dates use that month's last day, preserving the original rule. February 29 uses February 28 in non-leap years. Clock changes keep local time; skipped times use the next valid time and repeated times occur once.
 - Changes support undo. Existing tasks survive; series, exceptions and completions persist locally. Calendars remain read-only; reminders and repetition based on completion wait for later work.
 
@@ -35,7 +35,7 @@ Recurrence comes before menu bar features and reminders.
 - Given an occurrence, when I complete and reopen it, then only its completion changes and future occurrences stay unchanged.
 - Given an occurrence, when I reschedule it, then only it moves and the rule stays unchanged; clearing its date or dropping it in the backlog is blocked.
 - Given a series, when I rename or delete one occurrence, then others remain; choosing this and following affects only that range's unfinished occurrences.
-- Given a series, when I change or stop repetition, then earlier history and completed occurrences remain.
+- Given a series, when I change its recurrence rule, then earlier history and completed occurrences remain.
 - Given an end date, when I browse beyond it, then no new occurrences exist; missing first dates, invalid intervals or earlier end dates cannot be saved.
 - Given a recurrence change, when I undo it, then the prior rule and affected occurrences return without duplicates.
 - Given saved series and exceptions, when I restart, then they remain and nonrecurring tasks are unchanged.
