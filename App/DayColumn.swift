@@ -62,7 +62,7 @@ struct DayColumn: View {
             dropMinute = nil
             let start = TaskDrop.start(atMinute: Self.dropMinute(at: session.location), on: day, calendar: calendar)
             for item in items {
-                taskModel.move(item.id, to: start, undoManager: undoManager)
+                taskModel.move(item, to: start, undoManager: undoManager)
             }
         }
         .onDropSessionUpdated { session in
@@ -74,12 +74,7 @@ struct DayColumn: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("day-column-\(dayIdentifier)")
-    }
-
-    private var dayIdentifier: String {
-        let components = calendar.dateComponents([.year, .month, .day], from: day)
-        return String(format: "%04d-%02d-%02d", components.year ?? 0, components.month ?? 0, components.day ?? 0)
+        .accessibilityIdentifier("day-column-\(WeekGridMetrics.dayIdentifier(day, calendar: calendar))")
     }
 
     private static func dropMinute(at location: CGPoint) -> Int {

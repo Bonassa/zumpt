@@ -82,8 +82,8 @@ struct BacklogPanel: View {
         }
         .dropDestination(for: TaskDragItem.self) { items, _ in
             isDropTargeted = false
-            for item in items {
-                model.move(item.id, to: nil, undoManager: undoManager)
+            for item in items where item.occurrence == nil {
+                model.move(item, to: nil, undoManager: undoManager)
             }
         }
         .onDropSessionUpdated { session in
@@ -111,7 +111,7 @@ struct BacklogPanel: View {
     private func rows(_ tasks: [TaskItem]) -> some View {
         ForEach(tasks) { task in
             BacklogRow(task: task)
-                .draggable(TaskDragItem(id: task.id))
+                .draggable(TaskDragItem(task: task))
         }
     }
 
