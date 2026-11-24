@@ -15,9 +15,9 @@
                     ]
                 case "week":
                     [
-                        builder.scheduled("Pagar fatura do cartão", day: 1, at: (8, 30), isDone: true),
-                        builder.scheduled("Revisar contrato", day: 5, at: (11, 0)),
-                        builder.scheduled("Ligar para o banco", day: 5, at: (14, 0)),
+                        builder.scheduled("Pagar fatura do cartão", day: 0, at: (8, 30), isDone: true),
+                        builder.scheduled("Revisar contrato", day: 4, at: (11, 0)),
+                        builder.scheduled("Ligar para o banco", day: 4, at: (14, 0)),
                     ]
                 case "overdue":
                     [

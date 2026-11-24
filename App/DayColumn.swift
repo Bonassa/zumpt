@@ -5,7 +5,6 @@ struct DayColumn: View {
     let day: Date
     let items: [PositionedItem]
     let colors: [String: CalendarColor]
-    let isWeekend: Bool
     let nowMinute: Int?
     let calendar: Calendar
     @Binding var selectedEventID: String?
@@ -54,7 +53,7 @@ struct DayColumn: View {
         }
         .frame(height: WeekGridMetrics.dayHeight)
         .background {
-            DayColumnBackground(isWeekend: isWeekend)
+            DayColumnBackground()
                 .contentShape(.rect)
                 .onTapGesture(perform: selection.clear)
         }
@@ -233,13 +232,8 @@ private struct NowLine: View {
 }
 
 private struct DayColumnBackground: View {
-    let isWeekend: Bool
-
     var body: some View {
         Canvas { context, size in
-            if isWeekend {
-                context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.weekendFill))
-            }
             for hour in 0..<24 {
                 let y = CGFloat(hour) * WeekGridMetrics.hourHeight
                 context.fill(Path(CGRect(x: 0, y: y, width: size.width, height: 1)), with: .color(.gridLine))
