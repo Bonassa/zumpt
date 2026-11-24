@@ -7,20 +7,24 @@ struct CalendarScreen: View {
     @Bindable var workspace: Workspace
 
     @State private var selection = TaskSelection()
+    @Environment(\.undoManager) private var undoManager
+    @Environment(\.locale) private var locale
 
     var body: some View {
+        @Bindable var selection = selection
         NavigationSplitView {
             AppSidebar(calendarModel: model, taskModel: taskModel, workspace: workspace)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } detail: {
             TimelineView(.everyMinute) { _ in
+                let now = model.now()
                 WeekGrid(
                     week: model.week,
                     events: model.visibleEvents,
-                    tasks: taskModel.tasks,
+                    tasks: taskModel.tasks(in: model.week, now: now),
                     colors: model.calendarColors,
                     calendar: model.calendar,
-                    now: model.now()
+                    now: now
                 )
             }
             .environment(model)
@@ -44,6 +48,12 @@ struct CalendarScreen: View {
         }
         .environment(taskModel)
         .environment(selection)
+        .sheet(item: $selection.editor) { request in
+            RecurringTaskEditor(request: request, model: taskModel, undoManager: undoManager)
+                .environment(\.locale, locale)
+                .environment(\.calendar, taskModel.calendar)
+                .environment(\.timeZone, taskModel.calendar.timeZone)
+        }
         .focusedSceneValue(\.newTask, workspace.beginNewTask)
         .focusedSceneValue(\.backlogVisibility, $workspace.isBacklogVisible)
     }

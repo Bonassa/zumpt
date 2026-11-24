@@ -1,6 +1,26 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ · All day" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Dia inteiro"
+          }
+        }
+      }
+    },
+    "%@, %@, Overdue" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@, Atrasada"
+          }
+        }
+      }
+    },
     "%lld awaiting" : {
       "localizations" : {
         "pt-BR" : {
@@ -183,6 +203,16 @@
         }
       }
     },
+    "Apply to" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplicar a"
+          }
+        }
+      }
+    },
     "Awaiting response" : {
       "localizations" : {
         "pt-BR" : {
@@ -219,6 +249,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O acesso ao calendário está desligado"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "Changes apply to this occurrence and following unfinished occurrences." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As alterações se aplicam a esta ocorrência e às seguintes ainda não concluídas."
+          }
+        }
+      }
+    },
+    "Choose a first date on or after the original occurrence date." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma primeira data igual ou posterior à data original da ocorrência."
+          }
+        }
+      }
+    },
+    "Choose an end date on or after the first date." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma data de término igual ou posterior à primeira data."
           }
         }
       }
@@ -283,6 +353,26 @@
         }
       }
     },
+    "Daily" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diária"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data"
+          }
+        }
+      }
+    },
     "Declined" : {
       "localizations" : {
         "pt-BR" : {
@@ -319,6 +409,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Venceu %@"
+          }
+        }
+      }
+    },
+    "Edit Repetition" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar repetição"
+          }
+        }
+      }
+    },
+    "End date" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data de término"
+          }
+        }
+      }
+    },
+    "End repetition" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar repetição"
+          }
+        }
+      }
+    },
+    "Enter a positive whole number for the interval." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite um número inteiro positivo para o intervalo."
           }
         }
       }
@@ -433,12 +563,32 @@
         }
       }
     },
+    "First date" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeira data"
+          }
+        }
+      }
+    },
     "Hide Backlog" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ocultar backlog"
+          }
+        }
+      }
+    },
+    "Interval" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intervalo"
           }
         }
       }
@@ -459,6 +609,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Talvez"
+          }
+        }
+      }
+    },
+    "Monthly" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensal"
           }
         }
       }
@@ -653,6 +813,66 @@
         }
       }
     },
+    "Repeat" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetir"
+          }
+        }
+      }
+    },
+    "Reschedule" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reagendar"
+          }
+        }
+      }
+    },
+    "Reschedule Occurrence" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reagendar ocorrência"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar"
+          }
+        }
+      }
+    },
+    "Set a time" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definir horário"
+          }
+        }
+      }
+    },
+    "Set Repetition" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definir repetição"
+          }
+        }
+      }
+    },
     "Show All Tasks" : {
       "localizations" : {
         "pt-BR" : {
@@ -679,6 +899,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tarefas sem horário. Arraste uma para a semana para agendar."
+          }
+        }
+      }
+    },
+    "This and following" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta e as seguintes"
+          }
+        }
+      }
+    },
+    "This occurrence" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta ocorrência"
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horário"
           }
         }
       }
@@ -729,6 +979,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Semana %lld"
+          }
+        }
+      }
+    },
+    "Weekdays" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dias da semana"
+          }
+        }
+      }
+    },
+    "Weekly" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semanal"
+          }
+        }
+      }
+    },
+    "Yearly" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anual"
           }
         }
       }

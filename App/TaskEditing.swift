@@ -38,7 +38,7 @@ struct TaskTitleField: View {
     }
 
     private func save() {
-        model.rename(task.id, to: draft, undoManager: undoManager)
+        model.rename(task, to: draft, undoManager: undoManager)
         selection.endRenaming()
     }
 }
@@ -51,12 +51,11 @@ struct TaskContextMenu: View {
 
     var body: some View {
         Button("Rename") {
-            selection.beginRenaming(task.id)
+            selection.requestRename(task)
         }
         Divider()
         Button("Delete", role: .destructive) {
-            selection.clear()
-            model.delete(task.id, undoManager: undoManager)
+            selection.requestDelete(task, model: model, undoManager: undoManager)
         }
     }
 }
@@ -96,8 +95,33 @@ private struct TaskKeyboardHandling: ViewModifier {
                 guard selection.selectedID == task.id, selection.renamingID == nil else {
                     return
                 }
-                selection.clear()
-                model.delete(task.id, undoManager: undoManager)
+                selection.requestDelete(task, model: model, undoManager: undoManager)
             }
+    }
+}
+
+extension TaskSelection {
+    func openEditor(_ action: TaskEditorRequest.Action, for task: TaskItem) {
+        clear()
+        editor = TaskEditorRequest(task: task, action: action)
+    }
+
+    func requestRename(_ task: TaskItem, fromDetails: Bool = false) {
+        if task.occurrence != nil {
+            openEditor(.rename, for: task)
+        } else if fromDetails {
+            renameAfterClosingDetails(task.id)
+        } else {
+            beginRenaming(task.id)
+        }
+    }
+
+    func requestDelete(_ task: TaskItem, model: TaskModel, undoManager: UndoManager?) {
+        if task.occurrence != nil {
+            openEditor(.delete, for: task)
+        } else {
+            clear()
+            model.delete(task, undoManager: undoManager)
+        }
     }
 }

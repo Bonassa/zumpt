@@ -8,6 +8,7 @@ final class TaskSelection {
     private(set) var renamingID: UUID?
     private(set) var detailsID: UUID?
     private var pendingRenameID: UUID?
+    var editor: TaskEditorRequest?
 
     @ObservationIgnored private var pendingDetails: Task<Void, Never>?
 
@@ -25,6 +26,9 @@ final class TaskSelection {
     }
 
     func selectAndShowDetails(_ id: UUID) {
+        guard editor == nil else {
+            return
+        }
         select(id)
         pendingDetails?.cancel()
         pendingDetails = Task { [weak self] in

@@ -21,6 +21,11 @@ enum WeekGridMetrics {
         Double(y * 60 / hourHeight)
     }
 
+    static func dayIdentifier(_ day: Date, calendar: Calendar) -> String {
+        let components = calendar.dateComponents([.year, .month, .day], from: day)
+        return String(format: "%04d-%02d-%02d", components.year ?? 0, components.month ?? 0, components.day ?? 0)
+    }
+
     static func weight(of day: Date, calendar: Calendar) -> CGFloat {
         calendar.isDateInWeekend(day) ? weekendWeight : 1
     }
@@ -49,6 +54,7 @@ struct WeekGrid: View {
             AllDayRow(
                 days: week.days,
                 events: events,
+                tasks: tasks.filter(\.isAllDay),
                 colors: colors,
                 calendar: calendar,
                 selectedEventID: $selectedEventID
@@ -187,6 +193,7 @@ private struct DayHeaderCell: View {
 private struct AllDayRow: View {
     let days: [Date]
     let events: [CalendarEvent]
+    let tasks: [TaskItem]
     let colors: [String: CalendarColor]
     let calendar: Calendar
     @Binding var selectedEventID: String?
@@ -202,11 +209,17 @@ private struct AllDayRow: View {
             WeightedColumns {
                 ForEach(days, id: \.self) { day in
                     AllDayCell(
+                        day: day,
                         events: DayLayout.allDayEvents(events, on: day, calendar: calendar),
+                        tasks: tasks.filter { task in
+                            task.scheduledStart.map { calendar.isDate($0, inSameDayAs: day) } ?? false
+                        },
                         colors: colors,
                         isWeekend: calendar.isDateInWeekend(day),
                         selectedEventID: $selectedEventID
                     )
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("all-day-\(WeekGridMetrics.dayIdentifier(day, calendar: calendar))")
                     .layoutValue(key: ColumnWeight.self, value: WeekGridMetrics.weight(of: day, calendar: calendar))
                 }
             }
@@ -219,10 +232,15 @@ private struct AllDayRow: View {
 }
 
 private struct AllDayCell: View {
+    let day: Date
     let events: [CalendarEvent]
+    let tasks: [TaskItem]
     let colors: [String: CalendarColor]
     let isWeekend: Bool
     @Binding var selectedEventID: String?
+    @Environment(TaskModel.self) private var taskModel
+    @Environment(\.undoManager) private var undoManager
+    @State private var isDropTargeted = false
 
     var body: some View {
         VStack(spacing: 4) {
@@ -233,11 +251,35 @@ private struct AllDayCell: View {
                     selectedEventID: $selectedEventID
                 )
             }
+            ForEach(tasks) { task in
+                TaskBlock(task: task)
+                    .frame(height: 22)
+            }
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 3)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(isWeekend ? Color.weekendFill : Color.clear)
+        .background {
+            // A drop destination on the cell itself reports its first child with the cell's accessibility frame.
+            Rectangle()
+                .fill(isWeekend ? Color.weekendFill : Color.clear)
+                .contentShape(.rect)
+                .dropDestination(for: TaskDragItem.self) { items, _ in
+                    isDropTargeted = false
+                    for item in items where item.occurrence != nil {
+                        taskModel.move(item, to: day, allDay: true, undoManager: undoManager)
+                    }
+                }
+                .taskDropTarget(accepts: { $0.occurrence != nil }, isTargeted: $isDropTargeted)
+        }
+        .overlay {
+            if isDropTargeted {
+                Rectangle()
+                    .fill(Color.task.opacity(0.06))
+                    .strokeBorder(Color.task, lineWidth: 1.5)
+                    .allowsHitTesting(false)
+            }
+        }
         .overlay(alignment: .leading) {
             Rectangle().fill(Color.gridLine).frame(width: 1)
         }

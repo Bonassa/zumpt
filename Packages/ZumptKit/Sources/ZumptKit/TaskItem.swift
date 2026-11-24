@@ -9,6 +9,8 @@ public struct TaskItem: Identifiable, Hashable, Sendable {
     public var scheduledStart: Date?
     public var completedAt: Date?
     public var missedStart: Date?
+    public let occurrence: TaskOccurrence?
+    public let isAllDay: Bool
 
     public init(
         id: UUID,
@@ -16,7 +18,9 @@ public struct TaskItem: Identifiable, Hashable, Sendable {
         createdAt: Date,
         scheduledStart: Date? = nil,
         completedAt: Date? = nil,
-        missedStart: Date? = nil
+        missedStart: Date? = nil,
+        occurrence: TaskOccurrence? = nil,
+        isAllDay: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -24,6 +28,8 @@ public struct TaskItem: Identifiable, Hashable, Sendable {
         self.scheduledStart = scheduledStart
         self.completedAt = completedAt
         self.missedStart = missedStart
+        self.occurrence = occurrence
+        self.isAllDay = isAllDay
     }
 
     public var isDone: Bool {
@@ -31,11 +37,14 @@ public struct TaskItem: Identifiable, Hashable, Sendable {
     }
 
     public var isOverdue: Bool {
-        missedStart != nil && scheduledStart == nil && !isDone
+        missedStart != nil && (occurrence != nil || scheduledStart == nil) && !isDone
     }
 
     public var scheduledEnd: Date? {
-        scheduledStart?.addingTimeInterval(TimeInterval(Self.durationInMinutes * 60))
+        guard !isAllDay else {
+            return nil
+        }
+        return scheduledStart?.addingTimeInterval(TimeInterval(Self.durationInMinutes * 60))
     }
 }
 
@@ -57,7 +66,7 @@ public enum TaskTitle {
 
 public enum Backlog {
     public static func tasks(_ tasks: [TaskItem]) -> [TaskItem] {
-        let waiting = tasks.filter { $0.scheduledStart == nil && !$0.isDone }
+        let waiting = tasks.filter { $0.occurrence == nil && $0.scheduledStart == nil && !$0.isDone }
         let overdue =
             waiting
             .compactMap { task in task.missedStart.map { (task, $0) } }
@@ -102,7 +111,7 @@ public enum OverdueTasks {
     }
 
     private static func returned(_ task: TaskItem, startOfToday: Date) -> TaskItem? {
-        guard let start = task.scheduledStart, !task.isDone, start < startOfToday else {
+        guard task.occurrence == nil, let start = task.scheduledStart, !task.isDone, start < startOfToday else {
             return nil
         }
         var overdue = task

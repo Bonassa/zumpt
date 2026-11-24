@@ -16,6 +16,12 @@ struct TaskBlock: View {
         let font = Font.system(size: 11, weight: task.isDone ? .medium : .semibold)
         HStack(spacing: 5) {
             CompletionButton(task: task, size: 12)
+            if task.isOverdue {
+                Image(systemName: "exclamationmark.circle.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(Color.overdue)
+                    .accessibilityHidden(true)
+            }
             if selection.renamingID == task.id {
                 TaskTitleField(task: task, font: font)
             } else {
@@ -32,7 +38,7 @@ struct TaskBlock: View {
         .overlay {
             RoundedRectangle(cornerRadius: 6)
                 .strokeBorder(
-                    task.isDone && !isSelected ? Color.doneTaskBorder : Color.task, lineWidth: isSelected ? 2 : 1.5)
+                    borderColor(isSelected: isSelected), lineWidth: isSelected ? 2 : 1.5)
         }
         .clipShape(.rect(cornerRadius: 6))
         .shadow(color: .black.opacity(task.isDone ? 0 : 0.08), radius: 1, y: 1)
@@ -40,7 +46,7 @@ struct TaskBlock: View {
         .onTapGesture(coordinateSpace: .local) { location in
             // Buttons nested in the scrolled week grid miss clicks, so the block routes clicks on the circle.
             if location.x <= Self.completionAreaWidth {
-                model.toggleCompletion(task.id, undoManager: undoManager)
+                model.toggleCompletion(task, undoManager: undoManager)
             } else {
                 selection.selectAndShowDetails(task.id)
             }
@@ -48,19 +54,19 @@ struct TaskBlock: View {
         .simultaneousGesture(
             SpatialTapGesture(count: 2, coordinateSpace: .local).onEnded { value in
                 if value.location.x > Self.completionAreaWidth {
-                    selection.beginRenaming(task.id)
+                    selection.requestRename(task)
                 }
             }
         )
         .contextMenu {
             TaskContextMenu(task: task, model: model, selection: selection, undoManager: undoManager)
         }
-        .draggable(TaskDragItem(id: task.id))
+        .taskDraggable(task)
         .taskKeyboardHandling(for: task)
         .taskDetailsPopover(for: task, arrowEdge: .trailing)
-        .help(Text(verbatim: "\(task.title) · \(timeRange)"))
+        .help(Text(verbatim: summary))
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text(verbatim: "\(task.title), \(timeRange)"))
+        .accessibilityLabel(Text(verbatim: summary))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("task-\(task.title)")
     }
@@ -72,8 +78,24 @@ struct TaskBlock: View {
         return task.isDone ? .doneTaskFill : .taskBlockFill
     }
 
-    private var timeRange: String {
-        task.scheduledStart.map { Self.timeRange(from: $0, locale: locale) } ?? ""
+    private func borderColor(isSelected: Bool) -> Color {
+        if isSelected {
+            return .task
+        }
+        if task.isOverdue {
+            return .overdue
+        }
+        return task.isDone ? .doneTaskBorder : .task
+    }
+
+    private var summary: String {
+        let schedule =
+            task.isAllDay
+            ? String(localized: "All day")
+            : task.scheduledStart.map { Self.timeRange(from: $0, locale: locale) } ?? ""
+        return task.isOverdue
+            ? String(localized: "\(task.title), \(schedule), Overdue")
+            : "\(task.title), \(schedule)"
     }
 
     static func timeRange(from start: Date, locale: Locale) -> String {
@@ -91,7 +113,7 @@ struct CompletionButton: View {
 
     var body: some View {
         Button {
-            model.toggleCompletion(task.id, undoManager: undoManager)
+            model.toggleCompletion(task, undoManager: undoManager)
         } label: {
             ZStack {
                 if task.isDone {

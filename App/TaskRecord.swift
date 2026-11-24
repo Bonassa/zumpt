@@ -35,3 +35,15 @@ final class TaskRecord {
         missedStart = task.missedStart
     }
 }
+
+/// One record stores the rule history and exceptions for a series.
+@Model
+final class TaskSeriesRecord {
+    @Attribute(.unique) var id: UUID
+    var data: Data
+
+    init(id: UUID, data: Data) {
+        self.id = id
+        self.data = data
+    }
+}

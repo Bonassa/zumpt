@@ -36,7 +36,7 @@ struct TaskDetailsView: View {
                     .accessibilityIdentifier("task-details-status")
                 } else if task.isOverdue, let missedStart = task.missedStart {
                     DetailRow(systemImage: "exclamationmark.circle.fill", iconColor: .overdue) {
-                        Text("Overdue since \(moment(missedStart))")
+                        Text("Overdue since \(moment(missedStart, allDay: task.isAllDay))")
                             .foregroundStyle(Color.overdue)
                     }
                     .accessibilityIdentifier("task-details-status")
@@ -51,14 +51,30 @@ struct TaskDetailsView: View {
             Divider()
 
             HStack {
+                if hasRepetitionRule {
+                    Button(task.occurrence == nil ? "Set Repetition" : "Edit Repetition", systemImage: "repeat") {
+                        selection.openEditor(.repetition, for: task)
+                    }
+                    .accessibilityIdentifier("task-details-repetition")
+                    Spacer(minLength: 0)
+                }
+                if task.occurrence != nil {
+                    Button("Reschedule", systemImage: "calendar") {
+                        selection.openEditor(.reschedule, for: task)
+                    }
+                    .accessibilityIdentifier("task-details-reschedule")
+                }
+            }
+            .buttonStyle(.borderless)
+
+            HStack {
                 Button("Rename", systemImage: "pencil") {
-                    selection.renameAfterClosingDetails(task.id)
+                    selection.requestRename(task, fromDetails: true)
                 }
                 .accessibilityIdentifier("task-details-rename")
                 Spacer(minLength: 0)
                 Button("Delete", systemImage: "trash", role: .destructive) {
-                    selection.clear()
-                    model.delete(task.id, undoManager: undoManager)
+                    selection.requestDelete(task, model: model, undoManager: undoManager)
                 }
                 .keyboardShortcut(.delete, modifiers: [])
                 .accessibilityIdentifier("task-details-delete")
@@ -79,13 +95,19 @@ struct TaskDetailsView: View {
         }
         let dayStyle = Date.FormatStyle(locale: locale).weekday(.wide).day().month(.wide)
         let day = EventDetailsView.capitalizingFirstLetter(of: start.formatted(dayStyle), locale: locale)
+        if task.isAllDay {
+            return String(localized: "\(day) · All day")
+        }
         return "\(day) · \(TaskBlock.timeRange(from: start, locale: locale))"
     }
 
-    private func moment(_ date: Date) -> String {
-        date.formatted(
-            Date.FormatStyle(locale: locale).weekday(.abbreviated).day().month(.abbreviated).hour().minute()
-        )
+    private var hasRepetitionRule: Bool {
+        task.occurrence.map { model.rule(for: $0) != nil } ?? true
+    }
+
+    private func moment(_ date: Date, allDay: Bool = false) -> String {
+        let day = Date.FormatStyle(locale: locale).weekday(.abbreviated).day().month(.abbreviated)
+        return date.formatted(allDay ? day : day.hour().minute())
     }
 }
 

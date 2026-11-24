@@ -82,18 +82,11 @@ struct BacklogPanel: View {
         }
         .dropDestination(for: TaskDragItem.self) { items, _ in
             isDropTargeted = false
-            for item in items {
-                model.move(item.id, to: nil, undoManager: undoManager)
+            for item in items where item.occurrence == nil {
+                model.move(item, to: nil, undoManager: undoManager)
             }
         }
-        .onDropSessionUpdated { session in
-            switch session.phase {
-            case .entering, .active:
-                isDropTargeted = session.localSession != nil
-            default:
-                isDropTargeted = false
-            }
-        }
+        .taskDropTarget(accepts: { $0.occurrence == nil }, isTargeted: $isDropTargeted)
         .onChange(of: workspace.newTaskRequests) {
             isNewTaskFieldFocused = true
         }
@@ -111,7 +104,7 @@ struct BacklogPanel: View {
     private func rows(_ tasks: [TaskItem]) -> some View {
         ForEach(tasks) { task in
             BacklogRow(task: task)
-                .draggable(TaskDragItem(id: task.id))
+                .taskDraggable(task)
         }
     }
 
