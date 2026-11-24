@@ -6,13 +6,13 @@ final class BacklogVisibilityTests: ZumptTestCase {
         let app = launchApp(taskFixture: "backlog")
         let backlog = element("backlog", in: app)
         XCTAssertTrue(backlog.waitForExistence(timeout: 5))
-        let sunday = element("day-column-2026-11-07", in: app)
-        let sundayEdge = sunday.frame.maxX
+        let friday = element("day-column-2026-11-06", in: app)
+        let fridayEdge = friday.frame.maxX
 
         click("backlog-toggle", in: app)
 
         XCTAssertTrue(backlog.waitForNonExistence(timeout: 2))
-        XCTAssertGreaterThan(sunday.frame.maxX, sundayEdge + 200, "The week takes the backlog's place")
+        XCTAssertGreaterThan(friday.frame.maxX, fridayEdge + 200, "The week takes the backlog's place")
         attachWindowScreenshot(of: app)
 
         click("backlog-toggle", in: app)

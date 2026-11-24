@@ -20,6 +20,7 @@ Every feature is judged by one question: is Zumpt at least as good as the Calend
 | Writing to calendars | Never | Zumpt is a place to look at the day, not another calendar client to keep in sync |
 | Tasks | Stored by Zumpt with SwiftData, schema ready for CloudKit | Tasks are the part Zumpt owns, and sync can be turned on later without a migration |
 | Devices | Mac only, signed with a free Apple ID | iPhone and CloudKit sync need the paid Apple Developer Program, so they wait |
+| Week | Monday to Friday only, in evenly sized columns, whatever the region's first weekday; on Saturday and Sunday the week shown is the coming one | Zumpt plans working days, so weekend columns only take space from them |
 | Language | English source with a Brazilian Portuguese translation, following the system language and region | The Mac runs in English with the Brazilian region |
 | Quality | End-to-end UI tests on a fixture calendar, unit tests in ZumptKit, strict lint, warnings as errors | Every change is checked the way the app is used |
 

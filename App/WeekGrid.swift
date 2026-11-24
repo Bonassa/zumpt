@@ -7,7 +7,6 @@ enum WeekGridMetrics {
     static let topPadding: CGFloat = 10
     static let bottomPadding: CGFloat = 12
     static let firstVisibleHour = 8
-    static let weekendWeight: CGFloat = 0.7
 
     static var dayHeight: CGFloat {
         hourHeight * 24
@@ -19,10 +18,6 @@ enum WeekGridMetrics {
 
     static func minute(forY y: CGFloat) -> Double {
         Double(y * 60 / hourHeight)
-    }
-
-    static func weight(of day: Date, calendar: Calendar) -> CGFloat {
-        calendar.isDateInWeekend(day) ? weekendWeight : 1
     }
 }
 
@@ -58,20 +53,15 @@ struct WeekGrid: View {
                 HStack(alignment: .top, spacing: 0) {
                     HourGutter(calendar: calendar, nowMinute: nowMinute)
                         .frame(width: WeekGridMetrics.gutterWidth)
-                    WeightedColumns {
+                    EqualColumns {
                         ForEach(week.days, id: \.self) { day in
                             DayColumn(
                                 day: day,
                                 items: DayLayout.timedItems(events: events, tasks: tasks, on: day, calendar: calendar),
                                 colors: colors,
-                                isWeekend: calendar.isDateInWeekend(day),
                                 nowMinute: calendar.isDate(day, inSameDayAs: now) ? nowMinute : nil,
                                 calendar: calendar,
                                 selectedEventID: $selectedEventID
-                            )
-                            .layoutValue(
-                                key: ColumnWeight.self,
-                                value: WeekGridMetrics.weight(of: day, calendar: calendar)
                             )
                         }
                     }
@@ -128,15 +118,13 @@ private struct DayHeaderRow: View {
     var body: some View {
         HStack(spacing: 0) {
             Color.clear.frame(width: WeekGridMetrics.gutterWidth)
-            WeightedColumns {
+            EqualColumns {
                 ForEach(days, id: \.self) { day in
                     DayHeaderCell(
                         day: day,
                         calendar: calendar,
-                        isToday: calendar.isDate(day, inSameDayAs: now),
-                        isWeekend: calendar.isDateInWeekend(day)
+                        isToday: calendar.isDate(day, inSameDayAs: now)
                     )
-                    .layoutValue(key: ColumnWeight.self, value: WeekGridMetrics.weight(of: day, calendar: calendar))
                 }
             }
         }
@@ -148,7 +136,6 @@ private struct DayHeaderCell: View {
     let day: Date
     let calendar: Calendar
     let isToday: Bool
-    let isWeekend: Bool
 
     @Environment(\.locale) private var locale
 
@@ -169,7 +156,6 @@ private struct DayHeaderCell: View {
                     .monospacedDigit()
             }
         }
-        .foregroundStyle(isWeekend && !isToday ? .secondary : .primary)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
     }
@@ -199,15 +185,13 @@ private struct AllDayRow: View {
                 .lineLimit(1)
                 .padding(.trailing, 8)
                 .frame(width: WeekGridMetrics.gutterWidth, alignment: .trailing)
-            WeightedColumns {
+            EqualColumns {
                 ForEach(days, id: \.self) { day in
                     AllDayCell(
                         events: DayLayout.allDayEvents(events, on: day, calendar: calendar),
                         colors: colors,
-                        isWeekend: calendar.isDateInWeekend(day),
                         selectedEventID: $selectedEventID
                     )
-                    .layoutValue(key: ColumnWeight.self, value: WeekGridMetrics.weight(of: day, calendar: calendar))
                 }
             }
         }
@@ -221,7 +205,6 @@ private struct AllDayRow: View {
 private struct AllDayCell: View {
     let events: [CalendarEvent]
     let colors: [String: CalendarColor]
-    let isWeekend: Bool
     @Binding var selectedEventID: String?
 
     var body: some View {
@@ -237,7 +220,6 @@ private struct AllDayCell: View {
         .padding(.vertical, 4)
         .padding(.horizontal, 3)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(isWeekend ? Color.weekendFill : Color.clear)
         .overlay(alignment: .leading) {
             Rectangle().fill(Color.gridLine).frame(width: 1)
         }

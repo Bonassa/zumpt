@@ -45,5 +45,4 @@ extension Color {
     static let today = Color(.sRGB, red: 217 / 255, green: 58 / 255, blue: 63 / 255)
     static let gridLine = Color.primary.opacity(0.08)
     static let strongGridLine = Color.primary.opacity(0.13)
-    static let weekendFill = Color.primary.opacity(0.02)
 }
