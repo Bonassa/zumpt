@@ -51,12 +51,14 @@ struct TaskDetailsView: View {
             Divider()
 
             HStack {
-                Button(task.occurrence == nil ? "Set Repetition" : "Edit Repetition", systemImage: "repeat") {
-                    selection.openEditor(.repetition, for: task)
-                }
-                .accessibilityIdentifier("task-details-repetition")
-                if task.occurrence != nil {
+                if hasRepetitionRule {
+                    Button(task.occurrence == nil ? "Set Repetition" : "Edit Repetition", systemImage: "repeat") {
+                        selection.openEditor(.repetition, for: task)
+                    }
+                    .accessibilityIdentifier("task-details-repetition")
                     Spacer(minLength: 0)
+                }
+                if task.occurrence != nil {
                     Button("Reschedule", systemImage: "calendar") {
                         selection.openEditor(.reschedule, for: task)
                     }
@@ -97,6 +99,10 @@ struct TaskDetailsView: View {
             return String(localized: "\(day) · All day")
         }
         return "\(day) · \(TaskBlock.timeRange(from: start, locale: locale))"
+    }
+
+    private var hasRepetitionRule: Bool {
+        task.occurrence.map { model.rule(for: $0) != nil } ?? true
     }
 
     private func moment(_ date: Date, allDay: Bool = false) -> String {

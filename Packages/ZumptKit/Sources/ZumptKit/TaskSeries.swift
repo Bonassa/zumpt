@@ -15,6 +15,10 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
         func includes(_ day: RecurrenceDay) -> Bool {
             (before.map { day < $0 } ?? true) && rule.includes(day)
         }
+
+        var hasOccurrences: Bool {
+            rule.firstOccurrence.map(includes) ?? false
+        }
     }
 
     private struct TitleChange: Codable, Equatable {
@@ -25,8 +29,14 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
     private struct Exception: Codable, Equatable {
         var title: String?
         var placement: OccurrencePlacement?
-        var completedAt: Date?
+        var completion: Completion?
         var isDeleted = false
+    }
+
+    private struct Completion: Codable, Equatable {
+        let date: Date
+        var title: String
+        var placement: OccurrencePlacement
     }
 
     public init(task: TaskItem, rule: RecurrenceRule, calendar: Calendar) {
@@ -36,12 +46,17 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
         schedules = [Schedule(rule: rule)]
         if let completedAt = task.completedAt, let start = task.scheduledStart {
             let placement = OccurrencePlacement(start, allDay: false, calendar: calendar)
-            exceptions[placement.day] = Exception(title: task.title, placement: placement, completedAt: completedAt)
+            exceptions[placement.day] = Exception(
+                completion: Completion(date: completedAt, title: task.title, placement: placement))
         }
     }
 
     public func rule(on originalDay: RecurrenceDay) -> RecurrenceRule? {
         schedules.last { $0.includes(originalDay) }?.rule
+    }
+
+    public var isEmpty: Bool {
+        schedules.isEmpty && exceptions.keys.allSatisfy { placement(on: $0) == nil }
     }
 
     public func tasks(on days: [RecurrenceDay], now: Date, calendar: Calendar) -> [TaskItem] {
@@ -63,7 +78,7 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
         }
         let occurrence = TaskOccurrence(seriesID: id, originalDay: originalDay)
         let start = placement.start(in: calendar)
-        let completedAt = exceptions[originalDay]?.completedAt
+        let completedAt = exceptions[originalDay]?.completion?.date
         let overdue = completedAt == nil && placement.day < RecurrenceDay(now, calendar: calendar)
         return TaskItem(
             id: occurrence.id, title: title(on: originalDay), createdAt: createdAt,
@@ -77,7 +92,7 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
             guard !exception.isDeleted else {
                 return nil
             }
-            if let placement = exception.placement {
+            if let placement = exception.completion?.placement ?? exception.placement {
                 return placement
             }
         }
@@ -89,28 +104,24 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
             return
         }
         exceptions[day, default: Exception()].placement = placement
+        exceptions[day]?.completion?.placement = placement
     }
 
     public mutating func toggleCompletion(on day: RecurrenceDay, now: Date) {
         guard let placement = placement(on: day) else {
             return
         }
-        if exceptions[day]?.completedAt != nil {
-            exceptions[day]?.completedAt = nil
-            if let rule = rule(on: day), placement == OccurrencePlacement(day: day, minute: rule.minute) {
-                exceptions[day]?.placement = nil
-            }
-            if exceptions[day]?.title == seriesTitle(on: day) {
-                exceptions[day]?.title = nil
+        if exceptions[day]?.completion != nil {
+            exceptions[day]?.completion = nil
+            if exceptions[day]?.placement == nil, rule(on: day) == nil {
+                exceptions[day]?.placement = placement
             }
             if exceptions[day] == Exception() {
                 exceptions[day] = nil
             }
         } else {
-            let title = title(on: day)
-            exceptions[day, default: Exception()].title = title
-            exceptions[day]?.placement = placement
-            exceptions[day]?.completedAt = now
+            exceptions[day, default: Exception()].completion = Completion(
+                date: now, title: title(on: day), placement: placement)
         }
     }
 
@@ -124,10 +135,11 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
                 return
             }
             exceptions[day, default: Exception()].title = title
+            exceptions[day]?.completion?.title = title
         case .thisAndFollowing:
             titleChanges.removeAll { $0.day >= day }
             titleChanges.append(TitleChange(day: day, title: title))
-            for key in Array(exceptions.keys) where key >= day && exceptions[key]?.completedAt == nil {
+            for key in Array(exceptions.keys) where key >= day && exceptions[key]?.completion == nil {
                 exceptions[key]?.title = nil
             }
         }
@@ -142,7 +154,7 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
             exceptions[day] = Exception(isDeleted: true)
         case .thisAndFollowing:
             truncateSchedules(before: day)
-            exceptions = exceptions.filter { $0.key < day || $0.value.completedAt != nil }
+            exceptions = exceptions.filter { $0.key < day || $0.value.completion != nil }
         }
     }
 
@@ -152,11 +164,11 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
         }
         truncateSchedules(before: day)
         schedules.append(Schedule(rule: rule))
-        exceptions = exceptions.filter { $0.key < day || $0.value.completedAt != nil || rule.includes($0.key) }
+        exceptions = exceptions.filter { $0.key < day || $0.value.completion != nil || rule.includes($0.key) }
     }
 
     private func title(on day: RecurrenceDay) -> String {
-        exceptions[day]?.title ?? seriesTitle(on: day)
+        exceptions[day]?.completion?.title ?? exceptions[day]?.title ?? seriesTitle(on: day)
     }
 
     private func seriesTitle(on day: RecurrenceDay) -> String {
@@ -168,5 +180,6 @@ public struct TaskSeries: Codable, Equatable, Identifiable, Sendable {
         if let last = schedules.indices.last, schedules[last].before.map({ $0 > day }) ?? true {
             schedules[last].before = day
         }
+        schedules.removeAll { !$0.hasOccurrences }
     }
 }

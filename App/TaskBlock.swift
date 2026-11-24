@@ -61,7 +61,7 @@ struct TaskBlock: View {
         .contextMenu {
             TaskContextMenu(task: task, model: model, selection: selection, undoManager: undoManager)
         }
-        .draggable(TaskDragItem(task: task))
+        .taskDraggable(task)
         .taskKeyboardHandling(for: task)
         .taskDetailsPopover(for: task, arrowEdge: .trailing)
         .help(Text(verbatim: summary))

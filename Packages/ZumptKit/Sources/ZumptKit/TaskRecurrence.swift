@@ -18,6 +18,10 @@ public struct RecurrenceDay: Codable, Hashable, Comparable, Sendable {
         date = Self.calendar.date(from: components) ?? Self.calendar.startOfDay(for: localDate)
     }
 
+    fileprivate init(utcDate: Date) {
+        date = utcDate
+    }
+
     public var weekday: Int {
         Self.calendar.component(.weekday, from: date)
     }
@@ -121,6 +125,14 @@ public struct RecurrenceRule: Codable, Equatable, Sendable {
             frequency: frequency, interval: interval, firstDay: day, weekdays: weekdays,
             weekStartsOn: weekStartsOn, minute: minute, endDay: endDay, preservingAnchorOf: self
         )
+    }
+
+    /// Every frequency but weekly starts on its first day; a weekly rule matches within its first two intervals.
+    var firstOccurrence: RecurrenceDay? {
+        (0..<(7 * (interval + 1))).lazy
+            .compactMap { RecurrenceDay.calendar.date(byAdding: .day, value: $0, to: self.firstDay.date) }
+            .map(RecurrenceDay.init(utcDate:))
+            .first(where: includes)
     }
 
     public func includes(_ day: RecurrenceDay) -> Bool {

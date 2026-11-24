@@ -71,9 +71,7 @@ private struct RepetitionEditor: View {
         let first = original?.localDate(in: calendar) ?? task.scheduledStart ?? model.now()
         let proposedTime =
             previous?.minute
-            ?? task.scheduledStart.map {
-                calendar.component(.hour, from: $0) * 60 + calendar.component(.minute, from: $0)
-            }
+            ?? task.scheduledStart.flatMap { OccurrencePlacement($0, allDay: task.isAllDay, calendar: calendar).minute }
         // Use an ordinary reference day so a DST gap on the first date cannot rewrite the desired time.
         let referenceDate = calendar.date(from: DateComponents(year: 2001, month: 1, day: 15)) ?? first
         let referenceDay = RecurrenceDay(referenceDate, calendar: calendar)
@@ -86,7 +84,8 @@ private struct RepetitionEditor: View {
         _hasTime = State(
             initialValue: previous.map { $0.minute != nil } ?? (task.scheduledStart != nil && !task.isAllDay))
         _time = State(
-            initialValue: OccurrencePlacement(day: referenceDay, minute: proposedTime ?? 9 * 60).start(in: calendar))
+            initialValue: OccurrencePlacement(day: referenceDay, minute: proposedTime ?? TaskEditorDefaults.minute)
+                .start(in: calendar))
         _hasEndDate = State(initialValue: previous?.endDay != nil)
         _endDate = State(initialValue: previous?.endDay?.localDate(in: calendar) ?? first)
     }
@@ -233,7 +232,11 @@ private struct OccurrenceDateEditor: View {
         self.task = task
         self.model = model
         self.undoManager = undoManager
-        _date = State(initialValue: task.scheduledStart ?? model.now())
+        let start = task.scheduledStart ?? model.now()
+        let placement = OccurrencePlacement(start, allDay: task.isAllDay, calendar: model.calendar)
+        _date = State(
+            initialValue: OccurrencePlacement(day: placement.day, minute: placement.minute ?? TaskEditorDefaults.minute)
+                .start(in: model.calendar))
         _hasTime = State(initialValue: !task.isAllDay)
     }
 
@@ -310,6 +313,10 @@ private struct OccurrenceScopeEditor: View {
         .padding(20)
         .frame(width: 360)
     }
+}
+
+private enum TaskEditorDefaults {
+    static let minute = 9 * 60
 }
 
 extension RecurrenceRule.Frequency {

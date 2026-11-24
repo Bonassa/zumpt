@@ -51,26 +51,83 @@ final class RecurringTasksTests: ZumptTestCase {
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         title.click()
         app.typeKey("a", modifierFlags: .command)
-        app.typeText("Exception")
+        app.typeText("Exame")
         click("occurrence-scope-apply", in: app)
-        XCTAssertTrue(occurrence("Exception", day: "2026-11-04", in: app).waitForExistence(timeout: 3))
+        XCTAssertTrue(occurrence("Exame", day: "2026-11-04", in: app).waitForExistence(timeout: 3))
         app.terminate()
 
         for _ in 0..<2 {
             let reopened = launchApp(
                 language: "en", locale: "en_US", tasksStore: store, now: "2026-11-06T15:00:00Z"
             )
-            let exception = occurrence("Exception", day: "2026-11-04", in: reopened)
+            let exception = occurrence("Exame", day: "2026-11-04", in: reopened)
             XCTAssertTrue(exception.waitForExistence(timeout: 3))
             XCTAssertTrue(exception.label.contains("Overdue"))
-            XCTAssertEqual(count(of: "task-Exception", in: reopened), 1)
+            XCTAssertEqual(count(of: "task-Exame", in: reopened), 1)
             XCTAssertTrue(occurrence("Routine", day: "2026-11-05", in: reopened).exists)
             XCTAssertTrue(occurrence("Routine", day: "2026-11-06", in: reopened).exists)
             XCTAssertFalse(element("backlog-task-Routine", in: reopened).exists)
-            XCTAssertFalse(element("backlog-task-Exception", in: reopened).exists)
+            XCTAssertFalse(element("backlog-task-Exame", in: reopened).exists)
             XCTAssertTrue(element("backlog-task-One-off", in: reopened).exists)
             reopened.terminate()
         }
+    }
+
+    @MainActor
+    func testACompletedOccurrenceTheRuleNoLongerCoversOnlyOffersRescheduling() {
+        let app = launchApp(language: "en", locale: "en_US")
+        addTask("Routine", in: app)
+        openRepetition(for: element("backlog-task-Routine", in: app), in: app)
+        click("recurrence-save", in: app)
+        let thursday = occurrence("Routine", day: "2026-11-05", in: app)
+        XCTAssertTrue(thursday.waitForExistence(timeout: 3))
+        let complete = element("all-day-2026-11-05", in: app).descendants(matching: .any)["complete-Routine"]
+            .firstMatch
+        complete.click()
+        XCTAssertTrue(complete.wait(for: \.label, toEqual: "Reopen Routine", timeout: 3))
+
+        openRepetition(for: occurrence("Routine", day: "2026-11-04", in: app), in: app)
+        setInterval("2", in: app)
+        click("recurrence-save", in: app)
+        XCTAssertTrue(occurrence("Routine", day: "2026-11-06", in: app).waitForExistence(timeout: 3))
+        XCTAssertTrue(thursday.exists)
+
+        thursday.click()
+        XCTAssertTrue(element("task-details-reschedule", in: app).waitForExistence(timeout: 3))
+        XCTAssertFalse(element("task-details-repetition", in: app).exists)
+        attachWindowScreenshot(of: app)
+    }
+
+    @MainActor
+    func testOccurrencesMoveBetweenDaysButNotIntoTheBacklog() {
+        let app = launchApp(language: "en", locale: "en_US")
+        addTask("Routine", in: app)
+        addTask("One-off", in: app)
+        openRepetition(for: element("backlog-task-Routine", in: app), in: app)
+        click("recurrence-save", in: app)
+        let wednesday = occurrence("Routine", day: "2026-11-04", in: app)
+        XCTAssertTrue(wednesday.waitForExistence(timeout: 3))
+
+        drag(wednesday, to: element("backlog", in: app), in: app)
+        XCTAssertTrue(wednesday.exists)
+        XCTAssertFalse(element("backlog-task-Routine", in: app).exists)
+
+        let oneOff = element("backlog-task-One-off", in: app)
+        drag(oneOff, to: element("all-day-2026-11-06", in: app), in: app)
+        XCTAssertTrue(oneOff.exists)
+        XCTAssertFalse(occurrence("One-off", day: "2026-11-06", in: app).exists)
+
+        drag(wednesday, to: element("event-Aniversário da Ana", in: app), in: app)
+        XCTAssertTrue(occurrence("Routine", day: "2026-11-06", in: app).waitForExistence(timeout: 3))
+        XCTAssertTrue(wednesday.waitForNonExistence(timeout: 3))
+    }
+
+    @MainActor
+    private func drag(_ source: XCUIElement, to target: XCUIElement, in app: XCUIApplication) {
+        app.activate()
+        let start = source.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let end = target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.click(forDuration: 0.3, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.3)
     }
 
     @MainActor

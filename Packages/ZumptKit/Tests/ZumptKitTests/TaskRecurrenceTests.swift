@@ -187,6 +187,92 @@ struct TaskRecurrenceTests {
         #expect(changed[3] == original[3])
     }
 
+    @Test func reopeningAnOccurrenceFollowsSeriesChangesMadeWhileItWasDone() throws {
+        let calendar = try makeCalendar()
+        let monday = try day(2026, 11, 2, in: calendar)
+        let tuesday = try day(2026, 11, 3, in: calendar)
+        let now = tuesday.localDate(in: calendar)
+        let rule = try #require(RecurrenceRule(frequency: .daily, interval: 1, firstDay: monday, minute: 540))
+        var series = TaskSeries(task: makeTask("Routine"), rule: rule, calendar: calendar)
+        series.toggleCompletion(on: tuesday, now: now)
+
+        series.rename(on: monday, to: "Review", scope: .thisAndFollowing)
+        let later = try #require(RecurrenceRule(frequency: .daily, interval: 1, firstDay: monday, minute: 600))
+        series.changeRule(from: monday, to: later)
+        let done = try #require(series.task(on: tuesday, now: now, calendar: calendar))
+        #expect(done.title == "Routine")
+        #expect(calendar.component(.hour, from: try #require(done.scheduledStart)) == 9)
+
+        series.toggleCompletion(on: tuesday, now: now)
+        let reopened = try #require(series.task(on: tuesday, now: now, calendar: calendar))
+        #expect(reopened.title == "Review")
+        #expect(calendar.component(.hour, from: try #require(reopened.scheduledStart)) == 10)
+    }
+
+    @Test func reopeningKeepsChangesMadeToTheOccurrenceItself() throws {
+        let calendar = try makeCalendar()
+        let monday = try day(2026, 11, 2, in: calendar)
+        let tuesday = try day(2026, 11, 3, in: calendar)
+        let friday = try day(2026, 11, 6, in: calendar)
+        let now = tuesday.localDate(in: calendar)
+        let rule = try #require(RecurrenceRule(frequency: .daily, interval: 1, firstDay: monday))
+        var series = TaskSeries(task: makeTask("Routine"), rule: rule, calendar: calendar)
+        series.rename(on: tuesday, to: "Exception", scope: .thisOccurrence)
+        series.toggleCompletion(on: tuesday, now: now)
+        series.move(tuesday, to: OccurrencePlacement(day: friday, minute: 480))
+        series.rename(on: monday, to: "Review", scope: .thisAndFollowing)
+
+        series.toggleCompletion(on: tuesday, now: now)
+        let reopened = try #require(series.task(on: tuesday, now: now, calendar: calendar))
+        #expect(reopened.title == "Exception")
+        #expect(reopened.scheduledStart == OccurrencePlacement(day: friday, minute: 480).start(in: calendar))
+    }
+
+    @Test func reopeningAnOccurrenceTheRuleNoLongerCoversKeepsItOnItsDate() throws {
+        let calendar = try makeCalendar()
+        let monday = try day(2026, 11, 2, in: calendar)
+        let tuesday = try day(2026, 11, 3, in: calendar)
+        let wednesday = try day(2026, 11, 4, in: calendar)
+        let now = wednesday.localDate(in: calendar)
+        let daily = try #require(RecurrenceRule(frequency: .daily, interval: 1, firstDay: monday))
+        var series = TaskSeries(task: makeTask("Routine"), rule: daily, calendar: calendar)
+        series.toggleCompletion(on: tuesday, now: now)
+        let everyOtherDay = try #require(RecurrenceRule(frequency: .daily, interval: 2, firstDay: monday))
+        series.changeRule(from: monday, to: everyOtherDay)
+        #expect(series.rule(on: tuesday) == nil)
+
+        series.toggleCompletion(on: tuesday, now: now)
+        let reopened = try #require(series.task(on: tuesday, now: now, calendar: calendar))
+        #expect(!reopened.isDone && reopened.isOverdue)
+        #expect(reopened.scheduledStart == tuesday.localDate(in: calendar))
+    }
+
+    @Test func aSeriesWithNothingLeftToShowIsEmpty() throws {
+        let calendar = try makeCalendar()
+        let monday = try day(2026, 11, 2, in: calendar)
+        let wednesday = try day(2026, 11, 4, in: calendar)
+        let now = monday.localDate(in: calendar)
+        let daily = try #require(RecurrenceRule(frequency: .daily, interval: 1, firstDay: monday))
+        var series = TaskSeries(task: makeTask("Routine"), rule: daily, calendar: calendar)
+        #expect(!series.isEmpty)
+        series.delete(on: monday, scope: .thisAndFollowing)
+        #expect(series.isEmpty)
+
+        let weekly = try #require(
+            RecurrenceRule(frequency: .weekly, interval: 1, firstDay: monday, weekdays: [4])
+        )
+        var completed = TaskSeries(task: makeTask("Routine"), rule: weekly, calendar: calendar)
+        completed.toggleCompletion(on: try day(2026, 11, 11, in: calendar), now: now)
+        completed.delete(on: wednesday, scope: .thisAndFollowing)
+        #expect(!completed.isEmpty)
+        completed.toggleCompletion(on: try day(2026, 11, 11, in: calendar), now: now)
+        #expect(!completed.isEmpty)
+
+        var weeklyOnly = TaskSeries(task: makeTask("Routine"), rule: weekly, calendar: calendar)
+        weeklyOnly.delete(on: wednesday, scope: .thisAndFollowing)
+        #expect(weeklyOnly.isEmpty)
+    }
+
     private func day(_ year: Int, _ month: Int, _ day: Int, in calendar: Calendar) throws -> RecurrenceDay {
         RecurrenceDay(try date(year, month, day, in: calendar), calendar: calendar)
     }

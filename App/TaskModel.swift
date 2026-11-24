@@ -183,7 +183,8 @@ final class TaskModel {
         var new = old
         update(&new)
         if new != old {
-            replace(.series(old), with: .series(new), actionName: actionName, undoManager: undoManager)
+            replace(
+                .series(old), with: new.isEmpty ? nil : .series(new), actionName: actionName, undoManager: undoManager)
         }
     }
 

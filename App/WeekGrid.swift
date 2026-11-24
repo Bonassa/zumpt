@@ -240,6 +240,7 @@ private struct AllDayCell: View {
     @Binding var selectedEventID: String?
     @Environment(TaskModel.self) private var taskModel
     @Environment(\.undoManager) private var undoManager
+    @State private var isDropTargeted = false
 
     var body: some View {
         VStack(spacing: 4) {
@@ -258,11 +259,25 @@ private struct AllDayCell: View {
         .padding(.vertical, 4)
         .padding(.horizontal, 3)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(isWeekend ? Color.weekendFill : Color.clear)
-        .contentShape(.rect)
-        .dropDestination(for: TaskDragItem.self) { items, _ in
-            for item in items where item.occurrence != nil {
-                taskModel.move(item, to: day, allDay: true, undoManager: undoManager)
+        .background {
+            // A drop destination on the cell itself reports its first child with the cell's accessibility frame.
+            Rectangle()
+                .fill(isWeekend ? Color.weekendFill : Color.clear)
+                .contentShape(.rect)
+                .dropDestination(for: TaskDragItem.self) { items, _ in
+                    isDropTargeted = false
+                    for item in items where item.occurrence != nil {
+                        taskModel.move(item, to: day, allDay: true, undoManager: undoManager)
+                    }
+                }
+                .taskDropTarget(accepts: { $0.occurrence != nil }, isTargeted: $isDropTargeted)
+        }
+        .overlay {
+            if isDropTargeted {
+                Rectangle()
+                    .fill(Color.task.opacity(0.06))
+                    .strokeBorder(Color.task, lineWidth: 1.5)
+                    .allowsHitTesting(false)
             }
         }
         .overlay(alignment: .leading) {
